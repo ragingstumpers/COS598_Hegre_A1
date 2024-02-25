@@ -1,5 +1,6 @@
 import defs
 import utils
+from multiprocessing import Pool
 from typing import Any
 
 # NEED TO ADD PREVIOUS CONFLICT LEVEL ENDOGENOUS, NEIGHBORING AVGS FOR EXOGENOUS AS ENDOGENOUS
@@ -29,11 +30,12 @@ class Simulator:
 
     def _simulate_years(
             self,
-            initial_base_values: dict[defs.VariableEnum, Any]
+            _,
         ) -> dict[int, dict[str, int]]:
         # these cannot be shared by the entire class
+        return {1: {"USA": 1, "CANADA": 2}, 2: {"USA": 2, "CANADA": 3}, 3: {"USA": 3, "CANADA": 4}}
         conflict_levels_by_year = {}
-        current_base_values = initial_base_values
+        current_base_values = self._initial_base_values
         while not current_base_values.get(defs.VariableEnum.should_stop_simulation):
             updated_values = utils.resolve(
                 defs.ResolverBase._resolver_registry,
@@ -44,8 +46,15 @@ class Simulator:
             current_base_values = updated_values[defs.VariableEnum.next_base_values]
         return conflict_levels_by_year
 
-    
-    def run(self, concurrent_simulations=25):
+    def run(self, concurrent_simulations=2):
         # do some multiprocoessing shit
-        pass
-          
+        with Pool(concurrent_simulations) as p:
+            print(p.map(self._simulate_years, [1, 2, 3]))
+
+
+def f(x):
+    return x*x
+
+if __name__ == '__main__':
+    sim = Simulator(None, None, None, None, None, None, None, None)
+    sim.run()
