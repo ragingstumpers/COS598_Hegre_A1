@@ -54,6 +54,8 @@ def resolve(
     for variable in compute_dag_order(dependency_registry):
         resolver = resolver_registry[variable]
         current_values[variable] = resolver.resolve(current_values)
+        print(variable)
+    return current_values
 
 
 def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, dict[str, int]]:
@@ -83,9 +85,9 @@ def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableE
     return {
         row: {
             col: initial[col]
-            for col in sorted(initial)
+            for col in sorted(initial, key=lambda x: x.value)
         }
-        for row in sorted(initial)
+        for row in sorted(initial, key=lambda x: x.value)
     }
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
@@ -97,16 +99,16 @@ def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum
 
 
 
-def _sample_coefficients(coeffs_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, float]]:
+def _sample_coefficients(coeffs_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, float]:
     return {
         var: random.random()*3*(-1 if random.random() < 0.2 else 1)
         for var in coeffs_necessary_variables
     }
 
-def process_major_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]]:
+def process_major_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
     return _sample_coefficients(defs.MAJOR_COEFFICIENTS_NECESSARY_VARIABLES)
 
-def process_minor_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]]:
+def process_minor_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
     return _sample_coefficients(defs.MINOR_COEFFICIENTS_NECESSARY_VARIABLES)
 
 
@@ -192,20 +194,19 @@ def create_initial_base_variables(
         minor_constant: float,
         major_constant: float,
     ) -> dict[defs.VariableEnum, Any]:
-        
-        assert start_year <= end_year
-        return {
-            **process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
-            **process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
-            **process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
-            **process_major_coeffs_matrix_csv(major_coefficients_filepath),
-            **process_exogenous_projections_csv(exogenous_projections_filepath),
-            **process_non_projected_base_variables_csv(country_init_filepath),
-            **process_regional_information_csv(regions_filepath),
-            **process_neighbor_countries_csv(neighbors_filepath),
-            defs.VariableEnum.current_year: start_year,
-            defs.VariableEnum.end_year: end_year,
-            defs.VariableEnum.should_stop_simulation: end_year < start_year,
-            defs.VariableEnum.minor_constant: minor_constant,
-            defs.VariableEnum.major_constant: major_constant,
-        }
+    assert start_year <= end_year
+    return {
+        **process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
+        **process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
+        **process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
+        **process_major_coeffs_matrix_csv(major_coefficients_filepath),
+        **process_exogenous_projections_csv(exogenous_projections_filepath),
+        **process_non_projected_base_variables_csv(country_init_filepath),
+        **process_regional_information_csv(regions_filepath),
+        **process_neighbor_countries_csv(neighbors_filepath),
+        defs.VariableEnum.current_year: start_year,
+        defs.VariableEnum.end_year: end_year,
+        defs.VariableEnum.should_stop_simulation: end_year < start_year,
+        defs.VariableEnum.minor_constant: minor_constant,
+        defs.VariableEnum.major_constant: major_constant,
+    }

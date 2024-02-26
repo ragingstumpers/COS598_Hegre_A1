@@ -18,7 +18,7 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
 
     variable = VariableEnum.next_base_values
     dependencies = [
-        VariableEnum.current_conflict_value_by_country,
+        VariableEnum.current_conflict_level_by_country,
         # ADD MORE, MOST OF THEM WILL MAP TO THEMSELVES, SOME OTHERS WONT
 
         VariableEnum.previous_logs_no_conflict_by_country,
@@ -33,7 +33,7 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
 
         VariableEnum.current_year,
         VariableEnum.end_year,
-        VariableEnum.should_stop_simulaton,
+        VariableEnum.should_stop_simulation,
 
         VariableEnum.minor_constant,
         VariableEnum.major_constant,
@@ -54,17 +54,17 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
 
 
         return {
-            VariableEnum.previous_year_conflict_level_by_country: current_values[VariableEnum.current_conflict_value_by_country],
+            VariableEnum.previous_year_conflict_level_by_country: current_values[VariableEnum.current_conflict_level_by_country],
 
             VariableEnum.previous_logs_no_conflict_by_country: _update_logs_conflict_history_by_country(
                 current_values[VariableEnum.previous_logs_no_conflict_by_country],
                 0,
-                current_values[VariableEnum.current_conflict_value_by_country],
+                current_values[VariableEnum.current_conflict_level_by_country],
             ),
             VariableEnum.previous_logs_minor_conflict_by_country: _update_logs_conflict_history_by_country(
                 current_values[VariableEnum.previous_logs_minor_conflict_by_country],
                 1,
-                current_values[VariableEnum.current_conflict_value_by_country],
+                current_values[VariableEnum.current_conflict_level_by_country],
             ),
 
             VariableEnum.projections_oil_level_by_country: current_values[VariableEnum.projections_oil_level_by_country],
@@ -76,7 +76,7 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
 
             VariableEnum.current_year: current_values[VariableEnum.current_year]+1,
             VariableEnum.end_year: current_values[VariableEnum.end_year],
-            VariableEnum.should_stop_simulaton: current_values[VariableEnum.should_stop_simulaton],
+            VariableEnum.should_stop_simulation: current_values[VariableEnum.should_stop_simulation],
 
             VariableEnum.minor_constant: current_values[VariableEnum.minor_constant],
             VariableEnum.major_constant: current_values[VariableEnum.major_constant],

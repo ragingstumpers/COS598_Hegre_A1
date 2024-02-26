@@ -1,11 +1,6 @@
 import abc
-import defs
 from enum import Enum
-from functools import reduce
-from multiprocessing import Pool
-import numpy
-import random
-from typing import Any, Generic, Type, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 S = TypeVar('S')
 T = TypeVar('T')
@@ -124,7 +119,7 @@ class VariableEnum(Enum):
     # current neighborhood youth * ln(t_1) DERIVED done
     current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country = 'current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country'
     # DERIVED done
-    current_conflict_value_by_country = 'current_conflict_value_by_country'
+    current_conflict_level_by_country = 'current_conflict_level_by_country'
 
     # BASE done
     country_to_neighbors = 'country_to_neighbors'
@@ -169,7 +164,7 @@ class VariableEnum(Enum):
     drawn_coefficients_major_by_variable = 'drawn_coefficients_by_variable'
 
     # DERIVED BUT BASE done
-    should_stop_simulaton = 'should_stop_simulation'
+    should_stop_simulation = 'should_stop_simulation'
 
 
     # DERIVED done
@@ -341,19 +336,14 @@ BASE_VARIABLES = {
 
 
 class ResolverMeta(type):
-    def __init__(mycls, name, bases, attrs):
-        if name != 'GenericResolverMeta':
-            if 'resolver_registry' not in attrs:
-                attrs['_resolver_registry'] = {}
-
-            if 'dependency_registry' not in attrs:
-                attrs['_dependency_registry'] = {}
-
+    _resolver_registry = {}
+    _dependency_registry = {}
+    def __new__(mycls, name, bases, attrs):
+        if name != 'AbstractResolverMeta':
             if name != 'ResolverBase':
-                attrs['_resolver_registry'][attrs['variable']] = mycls
-                attrs['_dependency_registry'][attrs['variable']] = attrs['dependencies']
-
-        super().__init__(name, bases, attrs)
+                mycls._resolver_registry[attrs['variable']] = mycls
+                mycls._dependency_registry[attrs['variable']] = attrs['dependencies']
+        return super().__new__(mycls, name, bases, attrs)
             
 
 class AbstractResolverMeta(ResolverMeta, abc.ABC):
@@ -374,12 +364,3 @@ class ResolverBase(Generic[S], metaclass=AbstractResolverMeta):
     @abc.abstractmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> S:
         raise NotImplementedError
-    
-
-
-def _construct_countries_to_neighbors_dict(csv_filepath: str) -> dict[str, set[str]]:
-    pass
-
-
-
-COUNTRIES_TO_NEIGHBORS = _construct_countries_to_neighbors_dict("filepath")

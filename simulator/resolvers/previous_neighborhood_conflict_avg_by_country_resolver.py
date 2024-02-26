@@ -5,7 +5,7 @@ from typing import Any
 class PreviousNeighborhoodConflictAvgByCountryResolver(ResolverBase[dict[str, float]]):
 
     variable = VariableEnum.previous_neighborhood_conflict_avg_by_country
-    dependencies = [VariableEnum.country_to_neighbors. VariableEnum.current_conflict_level_by_country]
+    dependencies = [VariableEnum.country_to_neighbors, VariableEnum.current_conflict_level_by_country]
 
     @classmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[str, float]:
