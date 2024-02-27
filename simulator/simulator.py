@@ -1,11 +1,10 @@
 import defs
-import utils
 from multiprocessing import Pool
+import utils
+import os
 # necessary to add all resolvers to registry for DAG
-import resolvers
+import resolvers # DO NOT REMOVE
 from typing import Any
-
-# NEED TO ADD PREVIOUS CONFLICT LEVEL ENDOGENOUS, NEIGHBORING AVGS FOR EXOGENOUS AS ENDOGENOUS
 
 class Simulator:
 
@@ -37,7 +36,6 @@ class Simulator:
         return conflict_levels_by_year
 
     def run(self):
-        # do some multiprocoessing shit
-        with Pool(self._concurrent_simulations) as p:
+        with Pool(min(os.cpu_count(), self._concurrent_simulations)) as p:
             results = p.map(self._simulate_years, [_ for _ in range(self._concurrent_simulations)])
         return utils.majority_results(results)
