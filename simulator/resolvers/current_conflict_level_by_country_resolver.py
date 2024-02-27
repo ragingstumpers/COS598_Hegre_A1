@@ -23,6 +23,7 @@ class CurrentConflictLevelByCountryResolver(ResolverBase[dict[str, int]]):
         conflict_level_by_country = {}
         for country in current_values[VariableEnum.previous_logs_minor_conflict_by_country].keys():
             variable_values = get_variable_values_for_specific_country(country, variables_by_country)
+            print(variable_values[VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country])
             minor_variable_values = {**variable_values, VariableEnum.constant: VariableEnum.minor_constant}
             major_variable_values = {**variable_values, VariableEnum.constant: VariableEnum.major_constant}
             minor_vals = dot_product(minor_coeffs_by_variable, minor_variable_values)

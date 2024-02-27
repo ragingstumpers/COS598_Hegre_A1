@@ -171,37 +171,31 @@ class VariableEnum(Enum):
     next_base_values = 'next_base_values'
 
 
-MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
+COUNTRY_SPECIFIC_VARIABLES = {
     VariableEnum.previous_year_was_minor_by_country,
     VariableEnum.previous_year_was_major_by_country,
     VariableEnum.previous_logs_no_conflict_by_country,
     VariableEnum.previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_oil_level_by_country,
     VariableEnum.current_oil_level_by_country,
     VariableEnum.current_oil_times_previous_year_was_minor_by_country,
     VariableEnum.current_oil_times_previous_year_was_major_by_country,
     VariableEnum.current_oil_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_ethnic_dominance_all_years_by_country,
     VariableEnum.current_ethnic_dominance_projection_by_country,
     VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_minor_by_country,
     VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country,
     VariableEnum.current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_imr_level_by_country,
     VariableEnum.current_imr_level_by_country,
     VariableEnum.current_imr_times_previous_year_was_minor_by_country,
     VariableEnum.current_imr_times_previous_year_was_major_by_country,
     VariableEnum.current_imr_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_youth_level_by_country,
     VariableEnum.current_youth_level_by_country,
     VariableEnum.current_youth_times_previous_year_was_minor_by_country,
     VariableEnum.current_youth_times_previous_year_was_major_by_country,
     VariableEnum.current_youth_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_population_level_by_country,
     VariableEnum.current_population_level_by_country,
     VariableEnum.current_population_times_previous_year_was_minor_by_country,
     VariableEnum.current_population_times_previous_year_was_major_by_country,
     VariableEnum.current_population_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_education_level_by_country,
     VariableEnum.current_education_level_by_country,
     VariableEnum.current_education_times_previous_year_was_minor_by_country,
     VariableEnum.current_education_times_previous_year_was_major_by_country,
@@ -216,54 +210,16 @@ MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
     VariableEnum.country_in_west_asia_north_africa_region_by_country,
     VariableEnum.country_in_west_africa_region_by_country,
     VariableEnum.country_in_south_africa_region_by_country,
+}
+
+
+MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
+    *COUNTRY_SPECIFIC_VARIABLES,
     VariableEnum.minor_constant,
 }
 
 MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = {
-    VariableEnum.previous_year_was_minor_by_country,
-    VariableEnum.previous_year_was_major_by_country,
-    VariableEnum.previous_logs_no_conflict_by_country,
-    VariableEnum.previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_oil_level_by_country,
-    VariableEnum.current_oil_level_by_country,
-    VariableEnum.current_oil_times_previous_year_was_minor_by_country,
-    VariableEnum.current_oil_times_previous_year_was_major_by_country,
-    VariableEnum.current_oil_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_ethnic_dominance_all_years_by_country,
-    VariableEnum.current_ethnic_dominance_projection_by_country,
-    VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_minor_by_country,
-    VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country,
-    VariableEnum.current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_imr_level_by_country,
-    VariableEnum.current_imr_level_by_country,
-    VariableEnum.current_imr_times_previous_year_was_minor_by_country,
-    VariableEnum.current_imr_times_previous_year_was_major_by_country,
-    VariableEnum.current_imr_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_youth_level_by_country,
-    VariableEnum.current_youth_level_by_country,
-    VariableEnum.current_youth_times_previous_year_was_minor_by_country,
-    VariableEnum.current_youth_times_previous_year_was_major_by_country,
-    VariableEnum.current_youth_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_population_level_by_country,
-    VariableEnum.current_population_level_by_country,
-    VariableEnum.current_population_times_previous_year_was_minor_by_country,
-    VariableEnum.current_population_times_previous_year_was_major_by_country,
-    VariableEnum.current_population_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.projections_education_level_by_country,
-    VariableEnum.current_education_level_by_country,
-    VariableEnum.current_education_times_previous_year_was_minor_by_country,
-    VariableEnum.current_education_times_previous_year_was_major_by_country,
-    VariableEnum.current_education_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.current_neighborhood_imr_avg_by_country,
-    VariableEnum.current_neighborhood_education_avg_by_country,
-    VariableEnum.current_neighborhood_youth_avg_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
-    VariableEnum.country_in_west_asia_north_africa_region_by_country,
-    VariableEnum.country_in_west_africa_region_by_country,
-    VariableEnum.country_in_south_africa_region_by_country,
+    *COUNTRY_SPECIFIC_VARIABLES,
     VariableEnum.major_constant,
 }
 
@@ -339,11 +295,11 @@ class ResolverMeta(type):
     _resolver_registry = {}
     _dependency_registry = {}
     def __new__(mycls, name, bases, attrs):
-        if name != 'AbstractResolverMeta':
-            if name != 'ResolverBase':
-                mycls._resolver_registry[attrs['variable']] = mycls
+        newcls = super().__new__(mycls, name, bases, attrs)
+        if name not in ('AbstractResolverMeta', 'ResolverBase'):
+                mycls._resolver_registry[attrs['variable']] = newcls
                 mycls._dependency_registry[attrs['variable']] = attrs['dependencies']
-        return super().__new__(mycls, name, bases, attrs)
+        return newcls
             
 
 class AbstractResolverMeta(ResolverMeta, abc.ABC):

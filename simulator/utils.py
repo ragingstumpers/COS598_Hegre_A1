@@ -51,10 +51,11 @@ def resolve(
         base_values: dict[defs.VariableEnum, Any],
     ) -> dict[defs.VariableEnum, Any]:
     current_values = {**base_values}
+    print(current_values)
     for variable in compute_dag_order(dependency_registry):
         resolver = resolver_registry[variable]
-        current_values[variable] = resolver.resolve(current_values)
         print(variable)
+        current_values[variable] = resolver.resolve(current_values)
     return current_values
 
 
@@ -149,19 +150,19 @@ def process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, d
 
 
 
-def _sample_exo() -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
+def _sample_exo() -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
     return {
         var: {
-            country: {
-                year: random.random()*1000
-                for year in range(2000, 2010)
+            year: {
+                country: random.random()*1000
+                for country in _SAMPLE_COUNTRIES
             }
-            for country in _SAMPLE_COUNTRIES
+            for year in range(2000, 2010)
         }
         for var in defs.EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES
     }
 
-def process_exogenous_projections_csv(filepath: str) -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
+def process_exogenous_projections_csv(filepath: str) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
     return _sample_exo()
 
 
@@ -196,10 +197,10 @@ def create_initial_base_variables(
     ) -> dict[defs.VariableEnum, Any]:
     assert start_year <= end_year
     return {
-        **process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
-        **process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
-        **process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
-        **process_major_coeffs_matrix_csv(major_coefficients_filepath),
+        defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
+        defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
+        defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
+        defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(major_coefficients_filepath),
         **process_exogenous_projections_csv(exogenous_projections_filepath),
         **process_non_projected_base_variables_csv(country_init_filepath),
         **process_regional_information_csv(regions_filepath),

@@ -70,7 +70,7 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
             for dep in cls.dependencies
             if dep not in {
                 VariableEnum.drawn_coefficients_minor_by_variable,
-                VariableEnum.drawn_coefficients_majorby_variable,
+                VariableEnum.drawn_coefficients_major_by_variable,
                 VariableEnum.previous_neighborhood_conflict_avg_by_country,
                 VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
                 VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,

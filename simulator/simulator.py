@@ -32,7 +32,6 @@ class Simulator:
                 defs.ResolverBase._dependency_registry,
                 current_base_values
             )
-            print(updated_values)
             conflict_levels_by_year[current_base_values[defs.VariableEnum.current_year]] = updated_values[defs.VariableEnum.current_conflict_level_by_country]
             current_base_values = updated_values[defs.VariableEnum.next_base_values]
         return conflict_levels_by_year

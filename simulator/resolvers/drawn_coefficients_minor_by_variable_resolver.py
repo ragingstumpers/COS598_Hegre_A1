@@ -29,7 +29,7 @@ class DrawnCoefficientMinorByVariableResolver(ResolverBase[dict[str, float]]):
             for row in variable_list
         ]
         
-        coeffs = numpy.random.Generator.multivariate_normal(avg_coeffs_list, covariance_matrix)
+        coeffs = numpy.random.default_rng().multivariate_normal(avg_coeffs_list, covariance_matrix)
         return {
             var: coeffs[i]
             for i, var in enumerate(variable_list)

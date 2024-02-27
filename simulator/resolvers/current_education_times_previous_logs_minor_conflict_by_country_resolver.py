@@ -2,9 +2,9 @@ from defs import ResolverBase, VariableEnum
 from typing import Any
 
 
-class CurrentPopulationTimesPreviousLogsMinorConflictByCountryResolver(ResolverBase[dict[str, float]]):
+class CurrentEducationTimesPreviousLogsMinorConflictByCountryResolver(ResolverBase[dict[str, float]]):
 
-    variable = VariableEnum.current_population_times_previous_logs_minor_conflict_by_country
+    variable = VariableEnum.current_education_times_previous_logs_minor_conflict_by_country
     dependencies = [VariableEnum.current_education_level_by_country, VariableEnum.previous_logs_minor_conflict_by_country]
 
     @classmethod

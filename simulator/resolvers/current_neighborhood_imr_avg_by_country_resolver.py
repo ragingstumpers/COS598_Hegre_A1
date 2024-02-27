@@ -14,5 +14,5 @@ class CurrentNeighborhoodIMRAvgByCountryResolver(ResolverBase[dict[str, float]])
         current_imr_neighbor_averages_by_country = {}
         for country in current_imr_by_country.keys():
             neighbors = country_to_neighbors[country]
-            current_imr_neighbor_averages_by_country[country] = (sum((current_imr_by_country[neighbor] for neighbor in neighbors))*1.0) / len(neighbors)
+            current_imr_neighbor_averages_by_country[country] = (sum((current_imr_by_country[neighbor] for neighbor in neighbors))*1.0) / len(neighbors) if neighbors else 0
         return current_imr_neighbor_averages_by_country

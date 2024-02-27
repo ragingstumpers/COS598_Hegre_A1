@@ -8,6 +8,7 @@ from .covariance_matrix_major_by_variable_resolver import *
 from .covariance_matrix_minor_by_variable_resolver import *
 from .current_conflict_level_by_country_resolver import *
 from .current_education_level_by_country_resolver import *
+from .current_education_times_previous_logs_minor_conflict_by_country_resolver import *
 from .current_education_times_previous_year_was_major_by_country_resolver import *
 from .current_education_times_previous_year_was_minor_by_country_resolver import *
 from .current_ethnic_dominance_projection_by_country_resolver import *

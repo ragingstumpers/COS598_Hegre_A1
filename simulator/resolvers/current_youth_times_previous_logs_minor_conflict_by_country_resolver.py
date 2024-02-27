@@ -4,7 +4,7 @@ from typing import Any
 
 class CurrentYouthTimesPreviousLogsMinorConflictByCountryResolver(ResolverBase[dict[str, float]]):
 
-    variable = VariableEnum.current_youth_times_previous_year_was_minor_by_country
+    variable = VariableEnum.current_youth_times_previous_logs_minor_conflict_by_country
     dependencies = [VariableEnum.current_youth_level_by_country, VariableEnum.previous_logs_minor_conflict_by_country]
 
     @classmethod

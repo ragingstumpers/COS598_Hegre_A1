@@ -4,7 +4,7 @@ from typing import Any
 
 class PreviousNeighborhoodConflictAvgTimesPreviousLogsMinorConflictByCountryResolver(ResolverBase[dict[str, float]]):
 
-    variable = VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country
+    variable = VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country
     dependencies = [VariableEnum.previous_neighborhood_conflict_avg_by_country, VariableEnum.previous_logs_minor_conflict_by_country]
 
     @classmethod

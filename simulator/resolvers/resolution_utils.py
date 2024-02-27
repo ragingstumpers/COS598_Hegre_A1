@@ -23,17 +23,22 @@ def draw_result_from_probability_matrix(
     return sampled_outcome
 
 
-def get_variable_values_for_specific_country(country: str, variables_by_country: dict[defs.VariableEnum, dict[str, Any]]) -> dict[defs.VariableEnum, Any]:
+def get_variable_values_for_specific_country(country: str, variables_by_country: dict[defs.VariableEnum, Any]) -> dict[defs.VariableEnum, Any]:
+    # should move the whitelist to a constant, do a set operation on the dict keys to make this more efficient
     return {
         var: values_for_all_countries[country]
         for var, values_for_all_countries in variables_by_country.items()
+        if var in defs.COUNTRY_SPECIFIC_VARIABLES
     }
 
 
 def dot_product(d1: dict[defs.VariableEnum, S], d2: dict[defs.VariableEnum, S]) -> list[S]:
+    print(d1)
+    print()
+    print(d2)
     return [
         v1*d2[var]
-        for var, v1 in d1.values()
+        for var, v1 in d1.items()
     ]
 
 def compute_logistic_probability(outcome_to_exponents: dict[S, list[float]]) -> dict[S, float]:

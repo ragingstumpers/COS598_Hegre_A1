@@ -10,7 +10,7 @@ class CurrentEthnicDominanceProjectionTimesPreviousYearWasMajorByCountryResolver
     @classmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[str, int]:
         current_ethnic_dominance_projection_by_country = current_values[VariableEnum.current_ethnic_dominance_projection_by_country]
-        previous_logs_major_conflict_by_country = current_values[VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country]
+        previous_logs_major_conflict_by_country = current_values[VariableEnum.previous_logs_minor_conflict_by_country]
         return {
             country: current_ethnic_dominance_projection_by_country[country] * previous_logs_major_conflict_by_country[country]
             for country in current_ethnic_dominance_projection_by_country.keys()
