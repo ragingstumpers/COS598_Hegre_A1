@@ -13,7 +13,7 @@ def draw_result_from_probability_matrix(
     total_prob = sum((prob for prob in transition_probabilities_by_outcome.values()))
     #print(total_prob)
     # rounding issues can creep up, therefore not exactly one
-    assert 1 >= total_prob > 0.999999
+    assert 1.0000001 > total_prob > 0.999999, f"total prob: {total_prob} does not sum to one"
 
     rand_val = random.random()
     sampled_outcome = None
