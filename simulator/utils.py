@@ -77,24 +77,25 @@ def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, 
 
 
 
-def _get_top_row_of_psd_matrix(num_entries: int) -> list[float]:
+def _get_sym_psd_matrix(num_entries: int) -> list[list[float]]:
     import numpy as np
     A = np.random.rand(num_entries, num_entries)
     B = np.dot(A, A.transpose())
-    return B[0]
+    return B
 
 def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
-    top_row_psd = [x / 10.0 for x in _get_top_row_of_psd_matrix(len(cov_matrix_necessary_variables))]
-    initial = {
-        var: top_row_psd[i]
+    num_entries = len(cov_matrix_necessary_variables)
+    sym_psd_matrix = _get_sym_psd_matrix(num_entries)
+    index_to_variable = {
+        i: var
         for i, var in enumerate(cov_matrix_necessary_variables)
     }
     return {
-        row: {
-            col: initial[col]
-            for col in sorted(initial, key=lambda x: x.value)
+        index_to_variable[row]: {
+            index_to_variable[col]: sym_psd_matrix[row][col] / 10.0
+            for col in range(num_entries)
         }
-        for row in sorted(initial, key=lambda x: x.value)
+        for row in range(num_entries)
     }
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
@@ -182,7 +183,7 @@ def process_exogenous_projections_csv(start_year: int, end_year: int, filepath: 
 def _sample_non_projected() -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
     return {
         var: {
-            country: 2
+            country: random.choice([0,1,2])
             for country in _SAMPLE_COUNTRIES
         }
         for var in defs.NON_PROJECTED_NECESSARY_VARIABLES
