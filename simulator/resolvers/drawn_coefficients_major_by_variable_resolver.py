@@ -12,7 +12,7 @@ class DrawnCoefficientsMajorByVariableResolver(ResolverBase[dict[str, float]]):
     @classmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[VariableEnum, float]:
         avg_coeffs_by_variable = current_values[VariableEnum.average_coefficients_major_by_variable]
-        covariance_matrix_by_variable = current_values[VariableEnum.covariance_matrix_by_variable]
+        covariance_matrix_by_variable = current_values[VariableEnum.covariance_matrix_major_by_variable]
 
         variable_list = list(avg_coeffs_by_variable.keys())
 

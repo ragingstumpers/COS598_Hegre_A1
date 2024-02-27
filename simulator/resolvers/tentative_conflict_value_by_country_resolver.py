@@ -64,30 +64,26 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
     @classmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[str, int]:
         minor_coeffs_by_variable = current_values[VariableEnum.drawn_coefficients_minor_by_variable]
-        major_coeffs_by_variable = current_values[VariableEnum.drawn_coefficients_minor_by_variable]
+        major_coeffs_by_variable = current_values[VariableEnum.drawn_coefficients_major_by_variable]
         variables_by_country = {
             dep: current_values[dep]
             for dep in cls.dependencies
             if dep not in {
                 VariableEnum.drawn_coefficients_minor_by_variable,
                 VariableEnum.drawn_coefficients_major_by_variable,
-                VariableEnum.previous_neighborhood_conflict_avg_by_country,
-                VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
-                VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-                VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
                 }
         }
         conflict_level_by_country = {}
         for country in current_values[VariableEnum.previous_logs_minor_conflict_by_country].keys():
             variable_values = get_variable_values_for_specific_country(country, variables_by_country)
             shared_overrides = {
-                VariableEnum.current_neighborhood_conflict_avg_by_country: current_values[VariableEnum.previous_neighborhood_conflict_avg_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country: current_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country: current_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country: current_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country],
+                VariableEnum.current_neighborhood_conflict_avg_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_by_country],
+                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country],
+                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country],
+                VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country],
             }
-            minor_variable_values = {**variable_values, **shared_overrides, VariableEnum.constant: VariableEnum.minor_constant}
-            major_variable_values = {**variable_values, **shared_overrides, VariableEnum.constant: VariableEnum.major_constant}
+            minor_variable_values = {**variable_values, **shared_overrides, VariableEnum.minor_constant: current_values[VariableEnum.minor_constant]}
+            major_variable_values = {**variable_values, **shared_overrides, VariableEnum.major_constant: current_values[VariableEnum.major_constant]}
             minor_vals = dot_product(minor_coeffs_by_variable, minor_variable_values)
             major_vals = dot_product(major_coeffs_by_variable, major_variable_values)
             result_to_exponent = {

@@ -138,10 +138,6 @@ class VariableEnum(Enum):
     minor_constant = 'minor_constant'
     # BASE done
     major_constant = 'major_constant'
-
-    # not resolved, set as minor or major when computing, but necessary to define
-    # done
-    constant = 'constant'
     
     # BASE done
     current_year = 'current_year'
@@ -151,17 +147,17 @@ class VariableEnum(Enum):
     end_year = 'end_year'
 
     # BASE done
-    average_coefficients_minor_by_variable = 'average_coefficients'
+    average_coefficients_minor_by_variable = 'average_coefficients_minor_by_variable'
     # BASE done
-    covariance_matrix_minor_by_variable = 'covariance_matrix'
+    covariance_matrix_minor_by_variable = 'covariance_matrix_minor_by_variable'
     # DERIVED done
-    drawn_coefficients_minor_by_variable = 'drawn_coefficients_by_variable'
+    drawn_coefficients_minor_by_variable = 'drawn_coefficients_minor_by_variable'
     # BASE done
-    average_coefficients_major_by_variable = 'average_coefficients'
+    average_coefficients_major_by_variable = 'average_coefficients_major_by_variable'
     # BASE done
-    covariance_matrix_major_by_variable = 'covariance_matrix'
+    covariance_matrix_major_by_variable = 'covariance_matrix_major_by_variable'
     # DERIVED done
-    drawn_coefficients_major_by_variable = 'drawn_coefficients_by_variable'
+    drawn_coefficients_major_by_variable = 'drawn_coefficients_major_by_variable'
 
     # DERIVED BUT BASE done
     should_stop_simulation = 'should_stop_simulation'
@@ -200,6 +196,10 @@ COUNTRY_SPECIFIC_VARIABLES = {
     VariableEnum.current_education_times_previous_year_was_minor_by_country,
     VariableEnum.current_education_times_previous_year_was_major_by_country,
     VariableEnum.current_education_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.previous_neighborhood_conflict_avg_by_country,
+    VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
+    VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
+    VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
     VariableEnum.current_neighborhood_imr_avg_by_country,
     VariableEnum.current_neighborhood_education_avg_by_country,
     VariableEnum.current_neighborhood_youth_avg_by_country,

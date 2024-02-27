@@ -1,4 +1,5 @@
 import argparse
+from defs import VariableEnum
 from utils import create_initial_base_variables
 from simulator import Simulator
 

@@ -51,10 +51,8 @@ def resolve(
         base_values: dict[defs.VariableEnum, Any],
     ) -> dict[defs.VariableEnum, Any]:
     current_values = {**base_values}
-    print(current_values)
     for variable in compute_dag_order(dependency_registry):
         resolver = resolver_registry[variable]
-        print(variable)
         current_values[variable] = resolver.resolve(current_values)
     return current_values
 
@@ -75,13 +73,21 @@ def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, 
         }
         for country, conflict_counts_by_year in country_to_year_counts.items()
     }
-   
 
+
+
+
+def _get_top_row_of_psd_matrix(num_entries: int) -> list[float]:
+    import numpy as np
+    A = np.random.rand(num_entries, num_entries)
+    B = np.dot(A, A.transpose())
+    return B[0]
 
 def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
+    top_row_psd = [x / 10.0 for x in _get_top_row_of_psd_matrix(len(cov_matrix_necessary_variables))]
     initial = {
-        var: random.random()*2
-        for var in cov_matrix_necessary_variables
+        var: top_row_psd[i]
+        for i, var in enumerate(cov_matrix_necessary_variables)
     }
     return {
         row: {
@@ -102,7 +108,7 @@ def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum
 
 def _sample_coefficients(coeffs_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, float]:
     return {
-        var: random.random()*3*(-1 if random.random() < 0.2 else 1)
+        var: random.random()*2*(-1 if random.random() < 0.2 else 1)
         for var in coeffs_necessary_variables
     }
 
@@ -150,20 +156,25 @@ def process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, d
 
 
 
-def _sample_exo() -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+def _sample_exo(start_year: int, end_year: int) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+    # should pass in start and end and validate that there is an entry for each in the projections
     return {
         var: {
             year: {
-                country: random.random()*1000
+                country: random.random()*3
                 for country in _SAMPLE_COUNTRIES
             }
-            for year in range(2000, 2010)
+            for year in range(start_year, end_year+1)
         }
         for var in defs.EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES
     }
 
-def process_exogenous_projections_csv(filepath: str) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
-    return _sample_exo()
+def process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+    values_by_variable_by_year_by_country = _sample_exo(start_year, end_year)
+    for years_to_values_by_country in values_by_variable_by_year_by_country.values():
+        assert start_year == min(years_to_values_by_country)
+        assert end_year == max(years_to_values_by_country)
+    return values_by_variable_by_year_by_country
 
 
 
@@ -195,13 +206,14 @@ def create_initial_base_variables(
         minor_constant: float,
         major_constant: float,
     ) -> dict[defs.VariableEnum, Any]:
+
     assert start_year <= end_year
     return {
         defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
         defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
         defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
         defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(major_coefficients_filepath),
-        **process_exogenous_projections_csv(exogenous_projections_filepath),
+        **process_exogenous_projections_csv(start_year, end_year, exogenous_projections_filepath),
         **process_non_projected_base_variables_csv(country_init_filepath),
         **process_regional_information_csv(regions_filepath),
         **process_neighbor_countries_csv(neighbors_filepath),
