@@ -25,7 +25,9 @@ class Simulator:
         #return {1: {"USA": 1, "CANADA": 2}, 2: {"USA": 2, "CANADA": 3}, 3: {"USA": 3, "CANADA": 4}} if _%2 else {1: {"USA": 0, "CANADA": 1}, 2: {"USA": 1, "CANADA": 2}, 3: {"USA": 2, "CANADA": 3}}
         conflict_levels_by_year = {}
         current_base_values = self._initial_base_variables
+        base_variables = utils.compute_base_variables(defs.ResolverBase._dependency_registry)
         while not current_base_values.get(defs.VariableEnum.should_stop_simulation):
+            assert base_variables.issubset(current_base_values), f"not all base variables accounted for"
             updated_values = utils.resolve(
                 defs.ResolverBase._resolver_registry,
                 defs.ResolverBase._dependency_registry,

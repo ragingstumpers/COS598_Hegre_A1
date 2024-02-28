@@ -261,6 +261,7 @@ CONSTANTS_NECESSARY_VARIABLES = {
     VariableEnum.major_constant,
 }
 
+# probably should not be computed like this but rather from the utils func
 BASE_VARIABLES = {
     VariableEnum.previous_year_conflict_level_by_country,
     VariableEnum.previous_logs_no_conflict_by_country,

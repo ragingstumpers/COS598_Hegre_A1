@@ -37,12 +37,12 @@ def compute_dag_order(
 
 def compute_base_variables(
         dependency_registry: dict[defs.VariableEnum, list[defs.VariableEnum]]
-    ) -> list[defs.VariableEnum]:
-    [
+    ) -> set[defs.VariableEnum]:
+    return {
         var
-        for var, deps in dependency_registry.values()
+        for var, deps in dependency_registry.items()
         if not deps
-    ]
+    }
 
 
 def resolve(
@@ -183,7 +183,7 @@ def process_exogenous_projections_csv(start_year: int, end_year: int, filepath: 
 def _sample_non_projected() -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
     return {
         var: {
-            country: random.choice([0,1,2])
+            country: random.choice([0,0,0,0,0,1,1,2])
             for country in _SAMPLE_COUNTRIES
         }
         for var in defs.NON_PROJECTED_NECESSARY_VARIABLES
