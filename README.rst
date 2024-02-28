@@ -1,5 +1,7 @@
-PLEASE NOTE THAT THIS IS NOT YET DONE, I HAVE TO WRITE THE CSV INGEST CODE, BUT YOU ARE WELCOME TO EDIT THIS AS YOU SEE FIT
+PLEASE NOTE THAT THIS IS NOT YET DONE, I HAVE TO WRITE THE CSV INGEST CODE, BUT YOU ARE WELCOME TO EDIT THIS AS YOU SEE FIT.
+
 ALSO, I TESTED THIS TO ENSURE NO ERRORS ON SAMPLE RANDOM DATA, BUT HAVE NOT YET RUN IT ON ACTUAL DATA, SO MAY BE SOME BUGS I HAVEN'T UNCOVERED YET (results being funny on real data will lmk math errors exist).
+
 1) Use requirements.txt to set up venv
 2) Wrote a CLI, please use `python run_simulation.py --help` to get info on how to run
     EXAMPLE INVOCATION (using meow for filenames):
