@@ -40,4 +40,5 @@ class Simulator:
     def run(self):
         with Pool(min(os.cpu_count(), self._concurrent_simulations)) as p:
             results = p.map(self._simulate_years, [_ for _ in range(self._concurrent_simulations)])
-        return utils.majority_results(results)
+        # return utils.majority_results(results)
+        return utils.average_sims(results)

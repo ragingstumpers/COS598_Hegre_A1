@@ -59,7 +59,7 @@ def resolve(
     return current_values
 
 
-def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, dict[str, int]]:
+def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[str, dict[int, int]]:
     # {USA: {year: {1: #}}}
     country_to_year_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
     # aggregage
@@ -76,6 +76,27 @@ def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, 
         for country, conflict_counts_by_year in country_to_year_counts.items()
     }
 
+
+def average_sims(sim_results: list[dict[int, dict[str, int]]]) -> dict[str, dict[int, dict[int, float]]]:
+    # {USA: {year: {1: #}}}
+    country_to_year_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+    # aggregage
+    for sim_result in sim_results:
+        for year, conflict_by_country in sim_result.items():
+            for country, conflict_level in conflict_by_country.items():
+                country_to_year_counts[country][year][conflict_level] += 1
+    # choose maximal
+    num_sims = len(sim_results)
+    return {
+        country: {
+            year: {
+                lvl: (count*1.0) / num_sims
+                for lvl, count in conflict_counts.items()
+            }
+            for year, conflict_counts in conflict_counts_by_year.items()
+        }
+        for country, conflict_counts_by_year in country_to_year_counts.items()
+    }
 
 
 
@@ -443,14 +464,38 @@ def majority_results_outer(mult_sim_results: list[dict[str, dict[int, int]]]) ->
         for country, conflict_counts_by_year in country_to_year_counts.items()
     }
 
+def average_models(mult_sim_results: list[dict[str, dict[int, int]]]) -> dict[str, dict[int, dict[int, float]]]:
+   # {USA: {year: {1: #}}}
+    num_models = len(mult_sim_results)
+    country_to_year_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+    # aggregage
+    for sim_result in mult_sim_results:
+        for country, conflict_lvl_ratio_by_year in sim_result.items():
+            for year, conflict_lvl_ratio in conflict_lvl_ratio_by_year.items():
+                for lvl, ratio in conflict_lvl_ratio.items():
+                    country_to_year_counts[country][year][lvl] += (ratio*1.0) / num_models
+    # choose maximal
+    return country_to_year_counts
 
 
-def write_results(write_file: str, majority_results: dict[str, dict[int, int]]) -> None:
+
+def write_ratio_results(write_file: str, avg_results: dict[str, dict[int, dict[int, float]]]) -> None:
+    with open(write_file, "w+") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["COUNTRY", "YEAR", "PERCENTAGE NONE", "PERCENTAGE MINOR", "PERCENTAGE MAJOR"])
+        for country in sorted(avg_results):
+            country_results_by_year = avg_results[country]
+            for year in sorted(country_results_by_year, key=lambda year_string: int(year_string)):
+                percentages_by_lvl = country_results_by_year[year]
+                writer.writerow([country, year, percentages_by_lvl[0], percentages_by_lvl[1], percentages_by_lvl[2]])
+
+
+def write_results(write_file: str, maj_results: dict[str, dict[int, int]]) -> None:
     with open(write_file, "w+") as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(["COUNTRY", "YEAR", "CONFLICT LEVEL"])
-        for country in sorted(majority_results):
-            country_results_by_year = majority_results[country]
+        for country in sorted(maj_results):
+            country_results_by_year = maj_results[country]
             for year in sorted(country_results_by_year, key=lambda year_string: int(year_string)):
                 writer.writerow([country, year, country_results_by_year[year]])
 

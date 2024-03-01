@@ -1,7 +1,7 @@
 import argparse
 from collections import namedtuple
 from defs import VariableEnum
-from utils import create_initial_base_variables, majority_results_outer, write_results
+from utils import average_models, create_initial_base_variables, majority_results_outer, write_results, write_ratio_results
 from multiprocessing import Pool
 from simulator import Simulator
 
@@ -72,8 +72,8 @@ def _main():
         for cov, coeff in zip(args.covariance_matrix, args.coefficients)
     ]
 
-    results = map(_run_for_model, args_list)
-    write_results(args.output_destination, majority_results_outer(results))
+    results = list(map(_run_for_model, args_list))
+    write_ratio_results(args.output_destination, average_models(results))
     return
     with Pool(5) as p:
         results = p.map(_run_for_model, args_list)
