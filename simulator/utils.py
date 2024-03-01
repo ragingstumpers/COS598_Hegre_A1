@@ -99,9 +99,19 @@ def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableE
         for row in range(num_entries)
     }
 
+def _prefix_split_col(prefix: str, val: str) -> str:
+    # they sometimes have weird shit added after what should be the prefix...
+    if prefix not in val:
+        return val
+    return val.split(prefix)[-1].split('.')[-1]
+
+def _prefix_split_row(prefix: str, val: str) -> str:
+    # they sometimes have weird shit added after what should be the prefix...
+    return val.split(prefix)[-1].split('.')[-1]
+
 
 def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str, end_after: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
-    with open(filepath, newline='') as csv_file:
+    with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         cov = {}
@@ -117,7 +127,7 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
         for row in reader:
             row_iter = iter(row.items())
             _, raw_possible_row_varname = next(row_iter)
-            possible_row_varname = raw_possible_row_varname.split(prefix)[-1]
+            possible_row_varname = _prefix_split_row(prefix, raw_possible_row_varname)
             if possible_row_varname not in name_map:
                 continue
             row_variable = name_map[possible_row_varname]
@@ -125,7 +135,7 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
             cov[row_variable] = cur_row_map
             for raw_possible_col_varname, val in row_iter:
                 # there were leading : or . at times, therefore remove them
-                possible_col_varname = raw_possible_col_varname.split(prefix)[-1]
+                possible_col_varname = _prefix_split_col(prefix, raw_possible_col_varname)
                 if possible_col_varname in name_map:
                     #print(f"{possible_row_varname} --- {possible_col_varname} ---- {float(val)} --------- {val}")
                     cur_row_map[name_map[possible_col_varname]] = float(val)
@@ -136,7 +146,7 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
 
         # SHOULD PROBABLY ADD A CHECK THAT IT IS PSD
         # currently asserting that in the draw_cov/coeff file since construct the entire matrix there
-        assert(set(cov) == name_values_set)
+        assert(set(cov) == name_values_set),  f"the two sets differ:    {set(cov).difference(name_values_set)}\n {name_values_set.difference(set(cov))}\n"
         return cov
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
@@ -158,7 +168,7 @@ def _sample_coefficients(coeffs_necessary_variables: set[defs.VariableEnum]) -> 
 
 
 def _process_coeffs_matrix_csv(filepath: str, prefix: str, name_map: dict[str, defs.VariableEnum]) ->  dict[defs.VariableEnum, float]:
-    with open(filepath, newline='') as csv_file:
+    with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         reader_iter = iter(reader)
@@ -171,7 +181,7 @@ def _process_coeffs_matrix_csv(filepath: str, prefix: str, name_map: dict[str, d
         coeffs = {}
         for raw_possible_varname, val in row.items():
             # there were leading : or . at times, therefore remove them
-            possible_varname = raw_possible_varname.split(prefix)[-1]
+            possible_varname = _prefix_split_col(prefix, raw_possible_varname)
             if possible_varname in name_map:
                 coeffs[name_map[possible_varname]] = float(val)
         assert(set(coeffs) == set(name_map.values()))
@@ -230,7 +240,7 @@ def _sample_regions() -> dict[defs.VariableEnum, dict[str, int]]:
     }
 
 def _process_region_by_country(filepath: str) -> dict[str, int]:
-    with open(filepath, newline='') as csv_file:
+    with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         region_by_country = {}
@@ -269,7 +279,7 @@ def _convert_type_with_default(raw: str, convert_to: Type[S], default: S) -> S:
 
 
 def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
-    with open(filepath, newline='') as csv_file:
+    with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         all_countries = set()
@@ -331,7 +341,7 @@ def _sample_non_projected() -> dict[defs.VariableEnum, dict[str, float]]:
     }
 
 def _process_conflict_history_by_country_csv(start_year: int, filepath: str) -> dict[str, list[int]]:
-    with open(filepath, newline='') as csv_file:
+    with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         # {Variable: {Year: {Country: Val}}}
@@ -365,6 +375,24 @@ def process_non_projected_base_variables_csv(start_year: int, filepath: str) -> 
     return _process_non_projected_base_variables_csv(start_year, filepath)
 
 
+
+
+def majority_results_outer(mult_sim_results: list[dict[str, dict[int, int]]]) -> dict[str, dict[int, int]]:
+    # {USA: {year: {1: #}}}
+    country_to_year_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 0)))
+    # aggregage
+    for sim_result in mult_sim_results:
+        for country, conflict_by_year in sim_result.items():
+            for year, conflict_level in conflict_by_year.items():
+                country_to_year_counts[country][year][conflict_level] += 1
+    # choose maximal
+    return {
+        country: {
+            year: max(conflict_counts.items(), key=lambda a: a[1])[0]
+            for year, conflict_counts in conflict_counts_by_year.items()
+        }
+        for country, conflict_counts_by_year in country_to_year_counts.items()
+    }
 
 
 

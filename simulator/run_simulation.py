@@ -1,17 +1,35 @@
 import argparse
+from collections import namedtuple
 from defs import VariableEnum
-from utils import create_initial_base_variables, write_results
+from utils import create_initial_base_variables, majority_results_outer, write_results
+from multiprocessing import Pool
 from simulator import Simulator
+
+_Args = namedtuple("_Args", "cov coeff exo hist start end conc")
+
+def _run_for_model(args: _Args) -> dict[str, dict[int, int]]:
+    # lots of shit being done repeatedly, but thats fine for now
+    print(args.coeff)
+    initial_base_variables = create_initial_base_variables(
+        args.cov,
+        args.coeff,
+        args.exo,
+        args.hist,
+        args.start,
+        args.end
+    )
+    sim = Simulator(initial_base_variables, args.conc)
+    return sim.run()
 
 def _main():
     sim_cli = argparse.ArgumentParser(description="A program to run conflict data simulations. See Hegre 2013")
     sim_cli.add_argument(
         "-cov", "--covariance_matrix",
-        type=str, help="filepath to CSV file for entire covariance matrix", required=True,
+        nargs='*', type=str, help="filepaths to CSV files for entire covariance matrix. Make sure that they match with the coefficients filepaths order!", required=True,
     )
     sim_cli.add_argument(
         "-coeff", "--coefficients",
-        type=str, help="filepath to CSV file for entire coefficients matrix", required=True,
+        nargs='*', type=str, help="filepath to CSV file for entire coefficients matrix. Make sure that they match with the covariance filepaths order!", required=True,
     )
     sim_cli.add_argument(
         "-exo", "--exogenous_projections",
@@ -39,18 +57,27 @@ def _main():
     )
 
     args = sim_cli.parse_args()
-    initial_base_variables = create_initial_base_variables(
-        args.covariance_matrix,
-        args.coefficients,
-        args.exogenous_projections,
-        args.history,
-        args.start_year,
-        args.end_year,
-    )
+    assert(len(args.covariance_matrix) == len(args.coefficients)), "number of coeff files doesn't match covariance files"
+    
+    args_list = [
+        _Args(
+            cov,
+            coeff,
+            args.exogenous_projections,
+            args.history,
+            args.start_year,
+            args.end_year,
+            args.concurrent_simulations
+        )
+        for cov, coeff in zip(args.covariance_matrix, args.coefficients)
+    ]
 
-    sim = Simulator(initial_base_variables, args.concurrent_simulations)
-    results = sim.run()
-    write_results(args.output_destination, results)
+    results = map(_run_for_model, [args_list[2]])
+    write_results(args.output_destination, majority_results_outer(results))
+    return
+    with Pool(5) as p:
+        results = p.map(_run_for_model, args_list)
+    write_results(args.output_destination, majority_results(results))
     #print(len(results))
     #print(results)
 
