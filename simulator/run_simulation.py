@@ -72,7 +72,7 @@ def _main():
         for cov, coeff in zip(args.covariance_matrix, args.coefficients)
     ]
 
-    results = map(_run_for_model, [args_list[2]])
+    results = map(_run_for_model, args_list)
     write_results(args.output_destination, majority_results_outer(results))
     return
     with Pool(5) as p:
@@ -84,3 +84,5 @@ def _main():
 
 if __name__ == '__main__':
    _main()
+
+# python run_simulation.py -cov ~/Desktop/m23_cov.csv ~/Desktop/m43_cov.csv ~/Desktop/m45_cov.csv ~/Desktop/m48_cov.csv ~/Desktop/m66_cov.csv ~/Desktop/m67_cov.csv ~/Desktop/m96_cov.csv ~/Desktop/m97_cov.csv ~/Desktop/m98_cov.csv -coeff ~/Desktop/m23_coeff.csv ~/Desktop/m43_coeff.csv ~/Desktop/m45_coeff.csv ~/Desktop/m48_coeff.csv ~/Desktop/m66_coeff.csv ~/Desktop/m67_coeff.csv ~/Desktop/m96_coeff.csv ~/Desktop/m97_coeff.csv ~/Desktop/m98_coeff.csv -exo ~/Desktop/data.csv -hist ~/Desktop/data.csv -start 2000 -end 2008 -conc 100 -out ~/Desktop/results.csv

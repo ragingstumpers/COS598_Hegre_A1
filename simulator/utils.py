@@ -124,7 +124,7 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
             if row[""] == begin_after:
                 break
     
-        for row in reader:
+        for row in reader_iter:
             row_iter = iter(row.items())
             _, raw_possible_row_varname = next(row_iter)
             possible_row_varname = _prefix_split_row(prefix, raw_possible_row_varname)
@@ -134,6 +134,55 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
             cur_row_map = {}
             cov[row_variable] = cur_row_map
             for raw_possible_col_varname, val in row_iter:
+                # there were leading : or . at times, therefore remove them
+                possible_col_varname = _prefix_split_col(prefix, raw_possible_col_varname)
+                if possible_col_varname in name_map:
+                    assert name_map[possible_col_varname] not in cur_row_map
+                    # print(f"{possible_row_varname} --- {possible_col_varname} ---- {float(val)} --------- {val}")
+                    cur_row_map[name_map[possible_col_varname]] = float(val)
+            assert(set(cur_row_map) == name_values_set), f"the two sets differ:    {set(cur_row_map).difference(name_values_set)}\n {name_values_set.difference(set(cur_row_map))}\n"
+            # if we process the ending row, then terminate
+            if row[""] == end_after:
+                break
+
+        # SHOULD PROBABLY ADD A CHECK THAT IT IS PSD
+        # currently asserting that in the draw_cov/coeff file since construct the entire matrix there
+        assert(set(cov) == name_values_set),  f"the two sets differ:    {set(cov).difference(name_values_set)}\n {name_values_set.difference(set(cov))}\n"
+        return cov
+    
+def _process_covariance_matrix_csv_two(filepath: str, prefix: str, begin_after: str, end_after: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
+    if begin_after == "1":
+        offset = 1
+    else:
+        offset = 2
+    row_offset = 1 + 41*offset
+    col_offset = 40*offset-1
+    with open(filepath, mode="r", newline='') as csv_file:
+        # first row is interpreted as keys
+        reader = csv.DictReader(csv_file)
+        cov = {}
+        name_values_set = set(name_map.values())
+
+        reader_iter = iter(reader)
+
+        # get to beginning
+        for _ in reader_iter:
+            row_offset -= 1
+            if row_offset == 0:
+                break
+        meow = []
+        for i, row in enumerate(reader_iter):
+            row_iter = iter(row.items())
+            _, raw_possible_row_varname = next(row_iter)
+            possible_row_varname = _prefix_split_row(prefix, raw_possible_row_varname)
+            if possible_row_varname not in name_map:
+                continue
+            row_variable = name_map[possible_row_varname]
+            cur_row_map = {}
+            cov[row_variable] = cur_row_map
+            for j, (raw_possible_col_varname, val) in enumerate(row_iter):
+                if j < col_offset:
+                    continue
                 # there were leading : or . at times, therefore remove them
                 possible_col_varname = _prefix_split_col(prefix, raw_possible_col_varname)
                 if possible_col_varname in name_map:
@@ -151,11 +200,11 @@ def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str,
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values()))
-    return _process_covariance_matrix_csv(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    return _process_covariance_matrix_csv_two(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
 
 def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_covariance_matrix_csv(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    return _process_covariance_matrix_csv_two(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
 
 
 

@@ -28,7 +28,7 @@ class DrawnCoefficientsMajorByVariableResolver(ResolverBase[dict[str, float]]):
             ]
             for row in variable_list
         ]
-        assert(numpy.all(numpy.linalg.eigvals(covariance_matrix) > 0)), "covariance matrix is not PSD"
+        assert(numpy.all(numpy.linalg.eigvals(covariance_matrix) >= 0)), "covariance matrix is not PSD"
         coeffs = numpy.random.default_rng().multivariate_normal(avg_coeffs_list, covariance_matrix)
         return {
             var: coeffs[i]
