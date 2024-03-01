@@ -46,14 +46,6 @@ def _main():
         type=str, help="filepath to CSV file mapping country to its neighbors", required=True,
     )
     sim_cli.add_argument(
-        "-min_c", "--minor_constant",
-        type=float, help="the constant to be used in the minor case", required=True,
-    )
-    sim_cli.add_argument(
-        "-maj_c", "--major_constant",
-        type=float, help="the constant to be used in the major case", required=True,
-    )
-    sim_cli.add_argument(
         "-conc", "--concurrent_simulations",
         type=int, help="the number of concurrent simulations to run and then choose majority", default=10,
     )
@@ -70,8 +62,6 @@ def _main():
         args.end_year,
         args.regions,
         args.neighbors,
-        args.minor_constant,
-        args.major_constant,
     )
 
     sim = Simulator(initial_base_variables, args.concurrent_simulations)

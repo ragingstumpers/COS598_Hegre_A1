@@ -1,5 +1,6 @@
 import abc
 from enum import Enum
+import math
 from typing import Any, Generic, TypeVar
 
 S = TypeVar('S')
@@ -30,7 +31,7 @@ class VariableEnum(Enum):
     # Oil * C2_{t-1} DERIVED done
     current_oil_times_previous_year_was_major_by_country = 'current_oil_times_previous_year_was_major_by_country'
     # Oil * ln(t_1) DERIVED done
-    current_oil_times_previous_logs_minor_conflict_by_country = 'current_oil_times_previous_logs_minor_conflict_by_country'
+    current_oil_times_previous_logs_no_conflict_by_country = 'current_oil_times_previous_logs_no_conflict_by_country'
     
     # Ethn. dom PROJ BASE done
     projections_ethnic_dominance_all_years_by_country = 'projections_ethnic_dominance_all_years_by_country'
@@ -41,7 +42,7 @@ class VariableEnum(Enum):
     # Ethn. dom * C2_{t-1} DERIVED done
     current_ethnic_dominance_projection_times_previous_year_was_major_by_country = 'current_ethnic_dominance_projection_times_previous_year_was_major_by_country'
     # Ethn. dom *ln(t_1) DERIVED done
-    current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country = 'current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country'
+    current_ethnic_dominance_projection_times_previous_logs_no_conflict_by_country = 'current_ethnic_dominance_projection_times_previous_logs_no_conflict_by_country'
     
     # IF HAVE TIME CHANGE VARNAME TO BE LN IN FRONT
     # IMR BASE done
@@ -53,7 +54,7 @@ class VariableEnum(Enum):
     # IMR * C2_{t-1} DERIVED done
     current_imr_times_previous_year_was_major_by_country = 'current_imr_times_previous_year_was_major_by_country'
     # IMR * ln(t_1) DERIVED done
-    current_imr_times_previous_logs_minor_conflict_by_country = 'current_imr_times_previous_logs_minor_conflict_by_country'
+    current_imr_times_previous_logs_no_conflict_by_country = 'current_imr_times_previous_logs_no_conflict_by_country'
     
 
     # YOUTH BASE done
@@ -65,7 +66,7 @@ class VariableEnum(Enum):
     # YOUTH * C2_{t-1} DERIVED done
     current_youth_times_previous_year_was_major_by_country = 'current_youth_times_previous_year_was_major_by_country'
     # YOUTH * ln(t_1) DERIVED done
-    current_youth_times_previous_logs_minor_conflict_by_country = 'current_youth_times_previous_logs_minor_conflict_by_country'
+    current_youth_times_previous_logs_no_conflict_by_country = 'current_youth_times_previous_logs_no_conflict_by_country'
 
 
     # POPULATION BASE done
@@ -77,7 +78,7 @@ class VariableEnum(Enum):
     # POPULATION * C2_{t-1} DERIVED done
     current_population_times_previous_year_was_major_by_country = 'current_population_times_previous_year_was_major_by_country'
     # POPULATION * ln(t_1) DERIVED done
-    current_population_times_previous_logs_minor_conflict_by_country = 'current_population_times_previous_logs_minor_conflict_by_country'
+    current_population_times_previous_logs_no_conflict_by_country = 'current_population_times_previous_logs_no_conflict_by_country'
     
 
     # EDUCATION BASE done
@@ -89,7 +90,7 @@ class VariableEnum(Enum):
     # EDUCATION * C2_{t-1} DERIVED done
     current_education_times_previous_year_was_major_by_country = 'current_education_times_previous_year_was_major_by_country'
     # EDUCATION * ln(t_1) DERIVED done
-    current_education_times_previous_logs_minor_conflict_by_country = 'current_education_times_previous_logs_minor_conflict_by_country'
+    current_education_times_previous_logs_no_conflict_by_country = 'current_education_times_previous_logs_no_conflict_by_country'
     
 
     # neighborhood IMR DERIVED done
@@ -106,7 +107,7 @@ class VariableEnum(Enum):
     # previous neighborhood youth * C2_{t-1} DERIVED done
     previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country = 'previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country'
     # previous neighborhood youth * ln(t_1) DERIVED done
-    previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country = 'previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country'
+    previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country = 'previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country'
     # DERIVED done
     tentative_conflict_value_by_country = 'tentative_conflict_value_by_country'
 
@@ -117,7 +118,7 @@ class VariableEnum(Enum):
     # current neighborhood youth * C2_{t-1} DERIVED done
     current_neighborhood_conflict_avg_times_previous_year_was_major_by_country = 'current_neighborhood_conflict_avg_times_previous_year_was_major_by_country'
     # current neighborhood youth * ln(t_1) DERIVED done
-    current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country = 'current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country'
+    current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country = 'current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country'
     # DERIVED done
     current_conflict_level_by_country = 'current_conflict_level_by_country'
 
@@ -175,86 +176,77 @@ COUNTRY_SPECIFIC_VARIABLES = {
     VariableEnum.current_oil_level_by_country,
     VariableEnum.current_oil_times_previous_year_was_minor_by_country,
     VariableEnum.current_oil_times_previous_year_was_major_by_country,
-    VariableEnum.current_oil_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_oil_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_ethnic_dominance_projection_by_country,
     VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_minor_by_country,
     VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country,
-    VariableEnum.current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_ethnic_dominance_projection_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_imr_level_by_country,
     VariableEnum.current_imr_times_previous_year_was_minor_by_country,
     VariableEnum.current_imr_times_previous_year_was_major_by_country,
-    VariableEnum.current_imr_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_imr_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_youth_level_by_country,
     VariableEnum.current_youth_times_previous_year_was_minor_by_country,
     VariableEnum.current_youth_times_previous_year_was_major_by_country,
-    VariableEnum.current_youth_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_youth_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_population_level_by_country,
     VariableEnum.current_population_times_previous_year_was_minor_by_country,
     VariableEnum.current_population_times_previous_year_was_major_by_country,
-    VariableEnum.current_population_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_population_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_education_level_by_country,
     VariableEnum.current_education_times_previous_year_was_minor_by_country,
     VariableEnum.current_education_times_previous_year_was_major_by_country,
-    VariableEnum.current_education_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_education_times_previous_logs_no_conflict_by_country,
     VariableEnum.previous_neighborhood_conflict_avg_by_country,
     VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
     VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
     VariableEnum.current_neighborhood_imr_avg_by_country,
     VariableEnum.current_neighborhood_education_avg_by_country,
     VariableEnum.current_neighborhood_youth_avg_by_country,
     VariableEnum.current_neighborhood_conflict_avg_by_country,
     VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
     VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
+    VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
     VariableEnum.country_in_west_asia_north_africa_region_by_country,
     VariableEnum.country_in_west_africa_region_by_country,
     VariableEnum.country_in_south_africa_region_by_country,
 }
 
 
-MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
-    *COUNTRY_SPECIFIC_VARIABLES,
-    VariableEnum.minor_constant,
+MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS = {
+    'loi': VariableEnum.projections_oil_level_by_country,
+    'let': VariableEnum.projections_ethnic_dominance_all_years_by_country,
+    'lli': VariableEnum.projections_imr_level_by_country,
+    'lyo': VariableEnum.projections_youth_level_by_country,
+    'llpo': VariableEnum.projections_population_level_by_country,
+    'led': VariableEnum.projections_education_level_by_country,
 }
-
-MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = {
-    *COUNTRY_SPECIFIC_VARIABLES,
-    VariableEnum.major_constant,
-}
+EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES = set(MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS.values())
 
 
-MINOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MINOR_COEFFICIENTS_NECESSARY_VARIABLES
-MAJOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MAJOR_COEFFICIENTS_NECESSARY_VARIABLES
-
-
-EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES = {
-    VariableEnum.projections_oil_level_by_country,
-    VariableEnum.projections_ethnic_dominance_all_years_by_country,
-    VariableEnum.projections_imr_level_by_country,
-    VariableEnum.projections_youth_level_by_country,
-    VariableEnum.projections_population_level_by_country,
-    VariableEnum.projections_education_level_by_country,
+NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS = {
+    VariableEnum.previous_year_conflict_level_by_country: lambda history: history[-1],
+    VariableEnum.previous_year_was_minor_by_country: lambda history: 1 if history[-1] == 1 else 0,
+    VariableEnum.previous_year_was_major_by_country: lambda history: 1 if history[-1] == 2 else 0,
+    VariableEnum.previous_logs_no_conflict_by_country: lambda history: math.log(sum((1 if lvl == 0 else 0 for lvl in history))),
+    VariableEnum.previous_logs_minor_conflict_by_country: lambda history: math.log(sum((1 if lvl == 1 else 0 for lvl in history))),,
 }
 
 
-NON_PROJECTED_NECESSARY_VARIABLES = {
-    VariableEnum.previous_year_conflict_level_by_country,
-    VariableEnum.previous_year_was_minor_by_country,
-    VariableEnum.previous_year_was_major_by_country,
-    VariableEnum.previous_logs_no_conflict_by_country,
-    VariableEnum.previous_logs_minor_conflict_by_country,
-}
+NON_PROJECTED_NECESSARY_VARIABLES = set(NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS)
 
 NEIGHBOR_NECESSARY_BASE_VARIABLES = {
     VariableEnum.country_to_neighbors,
 }
 
-REGION_NECESSARY_VARIABLES = {
-    VariableEnum.country_in_west_asia_north_africa_region_by_country,
-    VariableEnum.country_in_west_africa_region_by_country,
-    VariableEnum.country_in_south_africa_region_by_country,
+REGION_NECESSARY_VARIABLES_PROCESSORS = {
+    VariableEnum.country_in_west_asia_north_africa_region_by_country: lambda region: 1 if region == 4 else 0,
+    VariableEnum.country_in_west_africa_region_by_country: lambda region: 1 if region == 6 else 0,
+    VariableEnum.country_in_south_africa_region_by_country: lambda region: 1 if region == 7 else 0,
 }
+
+REGION_NECESSARY_VARIABLES = set(REGION_NECESSARY_VARIABLES_PROCESSORS)
 
 CONSTANTS_NECESSARY_VARIABLES = {
     VariableEnum.minor_constant,
@@ -321,3 +313,79 @@ class ResolverBase(Generic[S], metaclass=AbstractResolverMeta):
     @abc.abstractmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> S:
         raise NotImplementedError
+
+_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
+    'lc1': VariableEnum.previous_year_was_minor_by_country,
+    'lc2': VariableEnum.previous_year_was_major_by_country,
+    'ltsc0': VariableEnum.previous_logs_no_conflict_by_country,
+    'ltsc1': VariableEnum.previous_logs_minor_conflict_by_country,
+
+    'loi': VariableEnum.current_oil_level_by_country,
+    'loic1': VariableEnum.current_oil_times_previous_year_was_minor_by_country,
+    'loic2': VariableEnum.current_oil_times_previous_year_was_major_by_country,
+    'lois0': VariableEnum.current_oil_times_previous_logs_no_conflict_by_country,
+
+    'let': VariableEnum.current_ethnic_dominance_projection_by_country,
+    'letc1': VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_minor_by_country,
+    'letc2':  VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country,
+    'lets0': VariableEnum.current_ethnic_dominance_projection_times_previous_logs_no_conflict_by_country,
+
+    'lli': VariableEnum.current_imr_level_by_country,
+    'limc1': VariableEnum.current_imr_times_previous_year_was_minor_by_country,
+    'limc2': VariableEnum.current_imr_times_previous_year_was_major_by_country,
+    'lims0': VariableEnum.current_imr_times_previous_logs_no_conflict_by_country,
+
+    'lyo': VariableEnum.current_youth_level_by_country,
+    'lyoc1': VariableEnum.current_youth_times_previous_year_was_minor_by_country,
+    'lyoc2':  VariableEnum.current_youth_times_previous_year_was_major_by_country,
+    'lyos0': VariableEnum.current_youth_times_previous_logs_no_conflict_by_country,
+
+    'llpo': VariableEnum.current_population_level_by_country,
+    'lpoc1': VariableEnum.current_population_times_previous_year_was_minor_by_country,
+    'lpoc2': VariableEnum.current_population_times_previous_year_was_major_by_country,
+    'lpos0': VariableEnum.current_population_times_previous_logs_no_conflict_by_country,
+
+    'led': VariableEnum.current_education_level_by_country,
+    'ledc1': VariableEnum.current_education_times_previous_year_was_minor_by_country,
+    'ledc2': VariableEnum.current_education_times_previous_year_was_major_by_country,
+    'leds0': VariableEnum.current_education_times_previous_logs_no_conflict_by_country,
+
+    'llin': VariableEnum.current_neighborhood_imr_avg_by_country,
+    'ledn': VariableEnum.current_neighborhood_education_avg_by_country,
+    'lyon': VariableEnum.current_neighborhood_youth_avg_by_country,
+    'lnc1': VariableEnum.current_neighborhood_conflict_avg_by_country,
+    'lnc1c1': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
+    'lnc1c2': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
+    'lnc1s0': VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
+
+    'r4': VariableEnum.country_in_west_asia_north_africa_region_by_country,
+    'r6': VariableEnum.country_in_west_africa_region_by_country,
+    'r7': VariableEnum.country_in_south_africa_region_by_country,
+
+}
+
+
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR = {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    '_cons': VariableEnum.minor_constant,
+}
+
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR = {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    '_cons': VariableEnum.major_constant,
+}
+
+
+MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
+    *(_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE.values()),
+    VariableEnum.minor_constant,
+}
+
+MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = {
+     *(_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE.values()),
+    VariableEnum.major_constant,
+}
+
+
+MINOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MINOR_COEFFICIENTS_NECESSARY_VARIABLES
+MAJOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MAJOR_COEFFICIENTS_NECESSARY_VARIABLES

@@ -19,32 +19,32 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
         VariableEnum.current_oil_level_by_country,
         VariableEnum.current_oil_times_previous_year_was_minor_by_country,
         VariableEnum.current_oil_times_previous_year_was_major_by_country,
-        VariableEnum.current_oil_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_oil_times_previous_logs_no_conflict_by_country,
         VariableEnum.projections_ethnic_dominance_all_years_by_country,
         VariableEnum.current_ethnic_dominance_projection_by_country,
         VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_minor_by_country,
         VariableEnum.current_ethnic_dominance_projection_times_previous_year_was_major_by_country,
-        VariableEnum.current_ethnic_dominance_projection_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_ethnic_dominance_projection_times_previous_logs_no_conflict_by_country,
         VariableEnum.projections_imr_level_by_country,
         VariableEnum.current_imr_level_by_country,
         VariableEnum.current_imr_times_previous_year_was_minor_by_country,
         VariableEnum.current_imr_times_previous_year_was_major_by_country,
-        VariableEnum.current_imr_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_imr_times_previous_logs_no_conflict_by_country,
         VariableEnum.projections_youth_level_by_country,
         VariableEnum.current_youth_level_by_country,
         VariableEnum.current_youth_times_previous_year_was_minor_by_country,
         VariableEnum.current_youth_times_previous_year_was_major_by_country,
-        VariableEnum.current_youth_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_youth_times_previous_logs_no_conflict_by_country,
         VariableEnum.projections_population_level_by_country,
         VariableEnum.current_population_level_by_country,
         VariableEnum.current_population_times_previous_year_was_minor_by_country,
         VariableEnum.current_population_times_previous_year_was_major_by_country,
-        VariableEnum.current_population_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_population_times_previous_logs_no_conflict_by_country,
         VariableEnum.projections_education_level_by_country,
         VariableEnum.current_education_level_by_country,
         VariableEnum.current_education_times_previous_year_was_minor_by_country,
         VariableEnum.current_education_times_previous_year_was_major_by_country,
-        VariableEnum.current_education_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.current_education_times_previous_logs_no_conflict_by_country,
         VariableEnum.current_neighborhood_imr_avg_by_country,
         VariableEnum.current_neighborhood_education_avg_by_country,
         VariableEnum.current_neighborhood_youth_avg_by_country,
@@ -52,7 +52,7 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
         VariableEnum.previous_neighborhood_conflict_avg_by_country,
         VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
         VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-        VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country,
+        VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
         
         VariableEnum.country_in_west_asia_north_africa_region_by_country,
         VariableEnum.country_in_west_africa_region_by_country,
@@ -75,15 +75,15 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
         }
         conflict_level_by_country = {}
         for country in current_values[VariableEnum.previous_logs_minor_conflict_by_country].keys():
-            variable_values = get_variable_values_for_specific_country(country, variables_by_country)
-            shared_overrides = {
-                VariableEnum.current_neighborhood_conflict_avg_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country],
-                VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country: variable_values[VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_minor_conflict_by_country],
-            }
-            minor_variable_values = {**variable_values, **shared_overrides, VariableEnum.minor_constant: current_values[VariableEnum.minor_constant]}
-            major_variable_values = {**variable_values, **shared_overrides, VariableEnum.major_constant: current_values[VariableEnum.major_constant]}
+            tentative_variable_values = get_variable_values_for_specific_country(country, variables_by_country)
+            # replacing the previous ones with the variable names expected since this is the tentative case
+            variable_values = {}
+            for var, val in tentative_variable_values.items():
+                if 'previous_neighborhood_conflict_avg' in var.value:
+                    var = VariableEnum(var.value.replace('previous_neighborhood_conflict_avg', 'current_neighborhood_conflict_avg'))
+                variable_values[var] = val
+            minor_variable_values = {**variable_values, VariableEnum.minor_constant: current_values[VariableEnum.minor_constant]}
+            major_variable_values = {**variable_values, VariableEnum.major_constant: current_values[VariableEnum.major_constant]}
             minor_vals = dot_product(minor_coeffs_by_variable, minor_variable_values)
             major_vals = dot_product(major_coeffs_by_variable, major_variable_values)
             result_to_exponent = {
