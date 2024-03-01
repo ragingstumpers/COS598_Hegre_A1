@@ -21,6 +21,8 @@ class VariableEnum(Enum):
     previous_logs_no_conflict_by_country = 'previous_logs_no_conflict_by_country'
     # ln(t_1) BASE done
     previous_logs_minor_conflict_by_country = 'previous_logs_minor_conflict_by_country'
+    # ln(t_2) BASE done
+    previous_logs_major_conflict_by_country = 'previous_logs_major_conflict_by_country'
 
     # Oil BASE done
     projections_oil_level_by_country = 'projections_oil_level_by_country'
@@ -173,6 +175,7 @@ COUNTRY_SPECIFIC_VARIABLES = {
     VariableEnum.previous_year_was_major_by_country,
     VariableEnum.previous_logs_no_conflict_by_country,
     VariableEnum.previous_logs_minor_conflict_by_country,
+    VariableEnum.previous_logs_major_conflict_by_country,
     VariableEnum.current_oil_level_by_country,
     VariableEnum.current_oil_times_previous_year_was_minor_by_country,
     VariableEnum.current_oil_times_previous_year_was_major_by_country,
@@ -224,13 +227,19 @@ MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS = {
 }
 EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES = set(MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS.values())
 
+def _safe_log(lvl_check: int, history: list[int]) -> float:
+    try:
+        return math.log(sum((1 if lvl == lvl_check else 0 for lvl in history)))
+    except Exception:
+        return 0
 
 NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS = {
     VariableEnum.previous_year_conflict_level_by_country: lambda history: history[-1],
     VariableEnum.previous_year_was_minor_by_country: lambda history: 1 if history[-1] == 1 else 0,
     VariableEnum.previous_year_was_major_by_country: lambda history: 1 if history[-1] == 2 else 0,
-    VariableEnum.previous_logs_no_conflict_by_country: lambda history: math.log(sum((1 if lvl == 0 else 0 for lvl in history))),
-    VariableEnum.previous_logs_minor_conflict_by_country: lambda history: math.log(sum((1 if lvl == 1 else 0 for lvl in history))),,
+    VariableEnum.previous_logs_no_conflict_by_country: lambda history:  _safe_log(0, history),
+    VariableEnum.previous_logs_minor_conflict_by_country: lambda history: _safe_log(1, history),
+    VariableEnum.previous_logs_major_conflict_by_country: lambda history: _safe_log(2, history),
 }
 
 
@@ -258,6 +267,7 @@ BASE_VARIABLES = {
     VariableEnum.previous_year_conflict_level_by_country,
     VariableEnum.previous_logs_no_conflict_by_country,
     VariableEnum.previous_logs_minor_conflict_by_country,
+    VariableEnum.previous_logs_major_conflict_by_country,
 
     VariableEnum.projections_oil_level_by_country,
     VariableEnum.projections_ethnic_dominance_all_years_by_country,
@@ -318,7 +328,6 @@ _MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
     'lc1': VariableEnum.previous_year_was_minor_by_country,
     'lc2': VariableEnum.previous_year_was_major_by_country,
     'ltsc0': VariableEnum.previous_logs_no_conflict_by_country,
-    'ltsc1': VariableEnum.previous_logs_minor_conflict_by_country,
 
     'loi': VariableEnum.current_oil_level_by_country,
     'loic1': VariableEnum.current_oil_times_previous_year_was_minor_by_country,
@@ -356,7 +365,7 @@ _MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
     'lnc1': VariableEnum.current_neighborhood_conflict_avg_by_country,
     'lnc1c1': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
     'lnc1c2': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    'lnc1s0': VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
+    'lnc1ts0': VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
 
     'r4': VariableEnum.country_in_west_asia_north_africa_region_by_country,
     'r6': VariableEnum.country_in_west_africa_region_by_country,
@@ -367,24 +376,20 @@ _MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
 
 MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR = {
     **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    'ltsc1': VariableEnum.previous_logs_minor_conflict_by_country,
     '_cons': VariableEnum.minor_constant,
 }
 
 MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR = {
     **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    'ltsc2': VariableEnum.previous_logs_major_conflict_by_country,
     '_cons': VariableEnum.major_constant,
 }
 
 
-MINOR_COEFFICIENTS_NECESSARY_VARIABLES = {
-    *(_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE.values()),
-    VariableEnum.minor_constant,
-}
+MINOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values())
 
-MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = {
-     *(_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE.values()),
-    VariableEnum.major_constant,
-}
+MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values())
 
 
 MINOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MINOR_COEFFICIENTS_NECESSARY_VARIABLES

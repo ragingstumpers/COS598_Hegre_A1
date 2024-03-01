@@ -15,6 +15,7 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
         VariableEnum.previous_year_was_major_by_country,
         VariableEnum.previous_logs_no_conflict_by_country,
         VariableEnum.previous_logs_minor_conflict_by_country,
+        VariableEnum.previous_logs_major_conflict_by_country,
         VariableEnum.projections_oil_level_by_country,
         VariableEnum.current_oil_level_by_country,
         VariableEnum.current_oil_times_previous_year_was_minor_by_country,
@@ -82,10 +83,15 @@ class TentativeConflictValueByCountryResolver(ResolverBase[dict[str, float]]):
                 if 'previous_neighborhood_conflict_avg' in var.value:
                     var = VariableEnum(var.value.replace('previous_neighborhood_conflict_avg', 'current_neighborhood_conflict_avg'))
                 variable_values[var] = val
+            # need to remove the variables that are per country but are specific to each one
             minor_variable_values = {**variable_values, VariableEnum.minor_constant: current_values[VariableEnum.minor_constant]}
-            major_variable_values = {**variable_values, VariableEnum.major_constant: current_values[VariableEnum.major_constant]}
+            minor_variable_values.pop(VariableEnum.previous_logs_major_conflict_by_country)
             minor_vals = dot_product(minor_coeffs_by_variable, minor_variable_values)
+
+            major_variable_values = {**variable_values, VariableEnum.major_constant: current_values[VariableEnum.major_constant]}
+            major_variable_values.pop(VariableEnum.previous_logs_minor_conflict_by_country)
             major_vals = dot_product(major_coeffs_by_variable, major_variable_values)
+
             result_to_exponent = {
                 0: 0,
                 1: minor_vals,

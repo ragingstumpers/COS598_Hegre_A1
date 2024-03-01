@@ -28,7 +28,6 @@ def draw_result_from_probability_matrix(
     assert sampled_outcome is not None
     return sampled_outcome
 
-
 def get_variable_values_for_specific_country(country: str, variables_by_country: dict[defs.VariableEnum, Any]) -> dict[defs.VariableEnum, Any]:
     # should move the whitelist to a constant, do a set operation on the dict keys to make this more efficient
     return {

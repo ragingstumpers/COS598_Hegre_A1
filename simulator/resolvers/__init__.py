@@ -46,6 +46,7 @@ from .major_constant_resolver import *
 from .minor_constant_resolver import *
 from .next_base_values_resolver import *
 from .previous_logs_minor_conflict_by_country_resolver import *
+from .previous_logs_major_conflict_by_country_resolver import *
 from .previous_logs_no_conflict_by_country_resolver import *
 from .previous_neighborhood_conflict_avg_by_country_resolver import *
 from .previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country_resolver import *

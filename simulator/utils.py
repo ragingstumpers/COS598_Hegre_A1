@@ -1,6 +1,7 @@
 from collections import defaultdict
 import csv
 import defs
+import numpy
 import random
 from typing import Any, Type, TypeVar
 
@@ -79,9 +80,8 @@ def majority_results(sim_results: list[dict[int, dict[str, int]]]) -> dict[int, 
 
 
 def _get_sym_psd_matrix(num_entries: int) -> list[list[float]]:
-    import numpy as np
-    A = np.random.rand(num_entries, num_entries)
-    B = np.dot(A, A.transpose())
+    A = numpy.random.rand(num_entries, num_entries)
+    B = numpy.dot(A, A.transpose())
     return B
 
 def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
@@ -100,20 +100,24 @@ def _sample_covariance_matrix(cov_matrix_necessary_variables: set[defs.VariableE
     }
 
 
-def _extract_possible_varname(raw_possible_varname: str) -> str:
-    return raw_possible_varname.split('.')[-1].split(':')[-1]
-
-
-def _process_covariance_matrix_csv(filepath: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
+def _process_covariance_matrix_csv(filepath: str, prefix: str, begin_after: str, end_after: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     with open(filepath, newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         cov = {}
         name_values_set = set(name_map.values())
+
+        reader_iter = iter(reader)
+
+        # get to beginning
+        for row in reader_iter:
+            if row[""] == begin_after:
+                break
+    
         for row in reader:
             row_iter = iter(row.items())
             _, raw_possible_row_varname = next(row_iter)
-            possible_row_varname = _extract_possible_varname(raw_possible_row_varname)
+            possible_row_varname = raw_possible_row_varname.split(prefix)[-1]
             if possible_row_varname not in name_map:
                 continue
             row_variable = name_map[possible_row_varname]
@@ -121,21 +125,27 @@ def _process_covariance_matrix_csv(filepath: str, name_map: dict[str, defs.Varia
             cov[row_variable] = cur_row_map
             for raw_possible_col_varname, val in row_iter:
                 # there were leading : or . at times, therefore remove them
-                possible_col_varname =_extract_possible_varname(raw_possible_col_varname)
+                possible_col_varname = raw_possible_col_varname.split(prefix)[-1]
                 if possible_col_varname in name_map:
-                    cur_row_map[name_map[possible_col_varname]] = val
-            assert(set(cur_row_map) == name_values_set)
+                    #print(f"{possible_row_varname} --- {possible_col_varname} ---- {float(val)} --------- {val}")
+                    cur_row_map[name_map[possible_col_varname]] = float(val)
+            assert(set(cur_row_map) == name_values_set), f"the two sets differ:    {set(cur_row_map).difference(name_values_set)}\n {name_values_set.difference(set(cur_row_map))}\n"
+            # if we process the ending row, then terminate
+            if row[""] == end_after:
+                break
+
         # SHOULD PROBABLY ADD A CHECK THAT IT IS PSD
+        # currently asserting that in the draw_cov/coeff file since construct the entire matrix there
         assert(set(cov) == name_values_set)
         return cov
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values()))
-    return _process_covariance_matrix_csv(filepath, defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    return _process_covariance_matrix_csv(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
 
 def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_covariance_matrix_csv(filepath, defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    return _process_covariance_matrix_csv(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
 
 
 
@@ -147,7 +157,7 @@ def _sample_coefficients(coeffs_necessary_variables: set[defs.VariableEnum]) -> 
     }
 
 
-def _process_coeffs_matrix_csv(filepath: str, name_map: dict[str, defs.VariableEnum]) ->  dict[defs.VariableEnum, float]:
+def _process_coeffs_matrix_csv(filepath: str, prefix: str, name_map: dict[str, defs.VariableEnum]) ->  dict[defs.VariableEnum, float]:
     with open(filepath, newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
@@ -161,20 +171,20 @@ def _process_coeffs_matrix_csv(filepath: str, name_map: dict[str, defs.VariableE
         coeffs = {}
         for raw_possible_varname, val in row.items():
             # there were leading : or . at times, therefore remove them
-            possible_varname = _extract_possible_varname(raw_possible_varname)
+            possible_varname = raw_possible_varname.split(prefix)[-1]
             if possible_varname in name_map:
-                coeffs[name_map[possible_varname]] = val
+                coeffs[name_map[possible_varname]] = float(val)
         assert(set(coeffs) == set(name_map.values()))
         return coeffs
 
 
 def process_major_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
     # return _sample_coefficients(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_coeffs_matrix_csv(filepath, defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    return _process_coeffs_matrix_csv(filepath, "2:", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
 
 def process_minor_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
     # return _sample_coefficients(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_coeffs_matrix_csv(filepath, defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    return _process_coeffs_matrix_csv(filepath, "1:", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
 
 
 
@@ -193,7 +203,7 @@ def _sample_neighbors() -> dict[str, list[str]]:
 
 def _process_neighbor_countries_csv(filepath: str) -> dict[str, list[str]]:
     country_to_region = _process_region_by_country(filepath)
-    region_to_countries_set = defaultdict(lambda: set)
+    region_to_countries_set = defaultdict(set)
     for country, region in country_to_region.items():
         region_to_countries_set[region].add(country)
     return {
@@ -224,9 +234,10 @@ def _process_region_by_country(filepath: str) -> dict[str, int]:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         region_by_country = {}
-        for row in reader:
+        for i, row in enumerate(reader):
             country = row['statename']
-            region = _convert_type_with_default(row['region'], int, 0)
+            # the default means it has no region so it shouldnt be paired with any other country, so we ensure default is different for each
+            region = _convert_type_with_default(row['region'], int, 100+i)
             region_by_country[country] = region
 
         return region_by_country
@@ -236,9 +247,9 @@ def _process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, 
     return {
         var: {
             country: processor(region)
+            for country, region in country_to_region.items()
         }
-       for country, region in country_to_region.items()
-       for var, processor in defs.REGION_NECESSARY_VARIABLES_PROCESSORS
+       for var, processor in defs.REGION_NECESSARY_VARIABLES_PROCESSORS.items()
     }
 
 
@@ -261,20 +272,28 @@ def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath:
     with open(filepath, newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
+        all_countries = set()
         # {Variable: {Year: {Country: Val}}}
-        proj_by_var_by_year_by_country = defaultdict(lambda: defaultdict(lambda: {}))
+        proj_by_var_by_year_by_country = defaultdict(lambda: defaultdict(dict))
         for row in reader:
+            country = row['statename']
+            all_countries.add(country)
+    
             year = int(row['year'])
             if year < start_year or year > end_year:
                 continue
-            country = row['statename']
-            for raw_possible_varname, val in row.items():
-                # there were leading : or . at times, therefore remove them
-                possible_varname =_extract_possible_varname(raw_possible_varname)
+            for possible_varname, val in row.items():
                 if possible_varname in name_map:
                     variable = name_map[possible_varname]
-                    proj_by_var_by_year_by_country[variable][year][country] = _convert_type_with_default(val, float, 0.0)
+                    value = _convert_type_with_default(val, float, 0.0)
+                    proj_by_var_by_year_by_country[variable][year][country] = value
 
+        # ensure that all countries have something for the exo variables, defaulting to 0
+        for proj_by_year_by_country in proj_by_var_by_year_by_country.values():
+            for proj_by_country in proj_by_year_by_country.values():
+                for country in all_countries:
+                    if country not in proj_by_country:
+                        proj_by_country[country] = 0
         assert(set(proj_by_var_by_year_by_country) == set(name_map.values()))
         return proj_by_var_by_year_by_country
 
@@ -316,12 +335,15 @@ def _process_conflict_history_by_country_csv(start_year: int, filepath: str) -> 
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         # {Variable: {Year: {Country: Val}}}
-        conflict_level_history_by_country = defaultdict(lambda: [])
+        conflict_level_history_by_country = defaultdict(lambda: [0])  # some countries do not have sufficient history, therefore we default to one non-war year
         for row in reader:
+            country = row['statename']
+            conflict_level_history_by_country[country]  # just done to instantiate in case no years apply
+            
             year = int(row['year'])
             if year >= start_year:
                 continue
-            country = row['statename']
+
             # CHECK WITH FUMIYA WHAT THE KEY SHOULD BE
             conflict_level = _convert_type_with_default(row['conflict'], int, 0)
             conflict_level_history_by_country[country].append(conflict_level)
@@ -333,9 +355,9 @@ def _process_non_projected_base_variables_csv(start_year: int, filepath: str) ->
     return {
         var: {
             country: processor(history)
+            for country, history in conflict_history_by_country.items()
         }
-       for country, history in conflict_history_by_country.items()
-       for var, processor in defs.NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS
+        for var, processor in defs.NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS.items()
     }
 
 def process_non_projected_base_variables_csv(start_year: int, filepath: str) -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
@@ -343,29 +365,38 @@ def process_non_projected_base_variables_csv(start_year: int, filepath: str) -> 
     return _process_non_projected_base_variables_csv(start_year, filepath)
 
 
+
+
+
+def write_results(write_file: str, majority_results: dict[str, dict[int, int]]) -> None:
+    with open(write_file, "w+") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["COUNTRY", "YEAR", "CONFLICT LEVEL"])
+        for country in sorted(majority_results):
+            country_results_by_year = majority_results[country]
+            for year in sorted(country_results_by_year, key=lambda year_string: int(year_string)):
+                writer.writerow([country, year, country_results_by_year[year]])
+
+
 def create_initial_base_variables(
-        minor_covariance_matrix_filepath: str,
-        minor_coefficients_filepath: str,
-        major_covariance_matrix_filepath: str,
-        major_coefficients_filepath: str,
+        covariance_matrix_filepath: str,
+        coefficients_filepath: str,
         exogenous_projections_filepath: str,
-        country_init_filepath: str,
+        history_filpath: str,
         start_year: int,
         end_year: int,
-        regions_filepath: str,
-        neighbors_filepath: str,
     ) -> dict[defs.VariableEnum, Any]:
 
     assert start_year <= end_year
     return {
-        defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(minor_covariance_matrix_filepath),
-        defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(minor_coefficients_filepath),
-        defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(major_covariance_matrix_filepath),
-        defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(major_coefficients_filepath),
+        defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(covariance_matrix_filepath),
+        defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(coefficients_filepath),
+        defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(covariance_matrix_filepath),
+        defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(coefficients_filepath),
         **process_exogenous_projections_csv(start_year, end_year, exogenous_projections_filepath),
-        **process_non_projected_base_variables_csv(start_year, country_init_filepath),
-        **process_regional_information_csv(regions_filepath),
-        defs.VariableEnum.country_to_neighbors: process_neighbor_countries_csv(neighbors_filepath),
+        **process_non_projected_base_variables_csv(start_year, history_filpath),
+        **process_regional_information_csv(history_filpath),
+        defs.VariableEnum.country_to_neighbors: process_neighbor_countries_csv(history_filpath),
         defs.VariableEnum.current_year: start_year,
         defs.VariableEnum.end_year: end_year,
         defs.VariableEnum.should_stop_simulation: end_year < start_year,

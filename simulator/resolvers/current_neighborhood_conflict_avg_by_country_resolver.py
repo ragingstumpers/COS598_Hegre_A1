@@ -14,5 +14,5 @@ class CurrentNeighborhoodConflictAvgByCountryResolver(ResolverBase[dict[str, flo
         current_conflict_neighbor_averages_by_country = {}
         for country in tentative_conflict_by_country.keys():
             neighbors = country_to_neighbors[country]
-            current_conflict_neighbor_averages_by_country[country] = (sum((current_conflict_neighbor_averages_by_country[neighbor] for neighbor in neighbors))*1.0) / len(neighbors) if neighbors else 0
+            current_conflict_neighbor_averages_by_country[country] = (sum((tentative_conflict_by_country[neighbor] for neighbor in neighbors))*1.0) / len(neighbors) if neighbors else 0
         return current_conflict_neighbor_averages_by_country
