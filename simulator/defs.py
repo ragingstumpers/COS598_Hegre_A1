@@ -104,26 +104,41 @@ class VariableEnum(Enum):
     # neighborhood youth DERIVED done
     current_neighborhood_youth_avg_by_country = 'current_neighborhood_youth_avg_by_country'
 
-    # previous neighborhood youth DERIVED done
-    previous_neighborhood_conflict_avg_by_country = 'previous_neighborhood_conflict_avg_by_country'
-    # previous neighborhood youth * C1_{t-1} DERIVED done
-    previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country = 'previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country'
-    # previous neighborhood youth * C2_{t-1} DERIVED done
-    previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country = 'previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country'
-    # previous neighborhood youth * ln(t_1) DERIVED done
-    previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country = 'previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country'
-    # DERIVED done
-    tentative_conflict_value_by_country = 'tentative_conflict_value_by_country'
+    # done
+    previous_neighborhood_has_minor_conflict_by_country = 'previous_neighborhood_has_minor_conflict_by_country'
+    # done
+    previous_neighborhood_has_minor_conflict_times_previous_year_was_minor_by_country = 'previous_neighborhood_has_minor_conflict_times_previous_year_was_minor_by_country'
+    # done
+    previous_neighborhood_has_minor_conflict_times_previous_year_was_major_by_country = 'previous_neighborhood_has_minor_conflict_times_previous_year_was_major_by_country'
+    # done
+    previous_neighborhood_has_minor_conflict_times_previous_logs_no_conflict_by_country = 'previous_neighborhood_has_minor_conflict_times_previous_logs_no_conflict_by_country'
+    
+    # done
+    previous_neighborhood_has_major_conflict_by_country = 'previous_neighborhood_has_major_conflict_by_country'
+    # done
+    previous_neighborhood_has_major_conflict_times_previous_year_was_minor_by_country = 'previous_neighborhood_has_major_conflict_times_previous_year_was_minor_by_country'
+    # done
+    previous_neighborhood_has_major_conflict_times_previous_year_was_major_by_country = 'previous_neighborhood_has_major_conflict_times_previous_year_was_major_by_country'
+    # done
+    previous_neighborhood_has_major_conflict_times_previous_logs_no_conflict_by_country = 'previous_neighborhood_has_major_conflict_times_previous_logs_no_conflict_by_country'
+    
+    # done
+    conflict_exponent_minor_by_country = 'conflict_exponent_minor_by_country'
+    # done
+    conflict_exponent_major_by_country = 'conflict_exponent_major_by_country'
 
-    # current neighborhood youth DERIVED done
-    current_neighborhood_conflict_avg_by_country = 'current_neighborhood_conflict_avg_by_country'
-    # current neighborhood youth * C1_{t-1} DERIVED done
-    current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country = 'current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country'
-    # current neighborhood youth * C2_{t-1} DERIVED done
-    current_neighborhood_conflict_avg_times_previous_year_was_major_by_country = 'current_neighborhood_conflict_avg_times_previous_year_was_major_by_country'
-    # current neighborhood youth * ln(t_1) DERIVED done
-    current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country = 'current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country'
-    # DERIVED done
+
+
+
+    # no resolver
+    previous_neighborhood_has_conflict_by_country = 'previous_neighborhood_has_conflict_by_country'
+    # no resolver
+    previous_neighborhood_has_conflict_times_previous_year_was_minor_by_country = 'previous_neighborhood_has_conflict_times_previous_year_was_minor_by_country'
+    # no resolver
+    previous_neighborhood_has_conflict_times_previous_year_was_major_by_country = 'previous_neighborhood_has_conflict_times_previous_year_was_major_by_country'
+    # no resolver
+    previous_neighborhood_has_conflict_times_previous_logs_no_conflict_by_country = 'previous_neighborhood_has_conflict_times_previous_logs_no_conflict_by_country'
+
     current_conflict_level_by_country = 'current_conflict_level_by_country'
 
     # BASE done
@@ -202,17 +217,19 @@ COUNTRY_SPECIFIC_VARIABLES = {
     VariableEnum.current_education_times_previous_year_was_minor_by_country,
     VariableEnum.current_education_times_previous_year_was_major_by_country,
     VariableEnum.current_education_times_previous_logs_no_conflict_by_country,
-    VariableEnum.previous_neighborhood_conflict_avg_by_country,
-    VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
-    VariableEnum.previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    VariableEnum.previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
+    
+    VariableEnum.previous_neighborhood_has_minor_conflict_by_country,
+    VariableEnum.previous_neighborhood_has_minor_conflict_times_previous_year_was_minor_by_country,
+    VariableEnum.previous_neighborhood_has_minor_conflict_times_previous_year_was_major_by_country,
+    VariableEnum.previous_neighborhood_has_minor_conflict_times_previous_logs_no_conflict_by_country,
+    VariableEnum.previous_neighborhood_has_major_conflict_by_country,
+    VariableEnum.previous_neighborhood_has_major_conflict_times_previous_year_was_minor_by_country,
+    VariableEnum.previous_neighborhood_has_major_conflict_times_previous_year_was_major_by_country,
+    VariableEnum.previous_neighborhood_has_major_conflict_times_previous_logs_no_conflict_by_country,
+
     VariableEnum.current_neighborhood_imr_avg_by_country,
     VariableEnum.current_neighborhood_education_avg_by_country,
     VariableEnum.current_neighborhood_youth_avg_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
     VariableEnum.country_in_west_asia_north_africa_region_by_country,
     VariableEnum.country_in_west_africa_region_by_country,
     VariableEnum.country_in_south_africa_region_by_country,
@@ -348,10 +365,10 @@ _MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
     'llin': VariableEnum.current_neighborhood_imr_avg_by_country,
     'ledn': VariableEnum.current_neighborhood_education_avg_by_country,
     'lyon': VariableEnum.current_neighborhood_youth_avg_by_country,
-    'lnc1': VariableEnum.current_neighborhood_conflict_avg_by_country,
-    'lnc1c1': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country,
-    'lnc1c2': VariableEnum.current_neighborhood_conflict_avg_times_previous_year_was_major_by_country,
-    'lnc1ts0': VariableEnum.current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country,
+    'lnc1': VariableEnum.previous_neighborhood_has_conflict_by_country,
+    'lnc1c1': VariableEnum.previous_neighborhood_has_conflict_times_previous_year_was_minor_by_country,
+    'lnc1c2': VariableEnum.previous_neighborhood_has_conflict_times_previous_year_was_major_by_country,
+    'lnc1ts0': VariableEnum.previous_neighborhood_has_conflict_times_previous_logs_no_conflict_by_country,
 
     'r4': VariableEnum.country_in_west_asia_north_africa_region_by_country,
     'r6': VariableEnum.country_in_west_africa_region_by_country,

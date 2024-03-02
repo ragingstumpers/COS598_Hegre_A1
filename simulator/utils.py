@@ -288,7 +288,7 @@ def _process_neighbor_countries_csv(filepath: str) -> tuple[dict[str, list[str]]
     for country, region in country_to_region.items():
         region_to_countries_set[region].add(country)
     return {
-        country: list(countries - {country})
+        country: list(countries)
         for countries in region_to_countries_set.values()
         for country in countries
     }, set(country_to_region)
@@ -421,7 +421,7 @@ def _process_conflict_history_by_country_csv(start_year: int, filepath: str, con
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         # {Variable: {Year: {Country: Val}}}
-        conflict_level_history_by_country = defaultdict(lambda: [0])  # some countries do not have sufficient history, therefore we default to one non-war year
+        conflict_level_history_by_country = defaultdict(lambda: [])  # some countries do not have sufficient history, therefore we default to one non-war year
         for row in reader:
             country = row['statename']
             conflict_level_history_by_country[country]  # just done to instantiate in case no years apply

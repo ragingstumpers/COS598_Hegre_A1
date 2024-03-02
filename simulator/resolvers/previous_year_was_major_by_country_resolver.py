@@ -11,6 +11,6 @@ class PreviousYearWasMajorByCountryResolver(ResolverBase[dict[str, int]]):
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[str, int]:
         prev_conflict_level_by_country = current_values[VariableEnum.previous_year_conflict_level_by_country]
         return {
-            country: 1 if level == 1 else 0
+            country: 1 if level == 2 else 0
             for country, level in prev_conflict_level_by_country.items()
         }

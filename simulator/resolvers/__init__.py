@@ -20,10 +20,6 @@ from .current_imr_level_by_country_resolver import *
 from .current_imr_times_previous_logs_no_conflict_by_country_resolver import *
 from .current_imr_times_previous_year_was_major_by_country_resolver import *
 from .current_imr_times_previous_year_was_minor_by_country_resolver import *
-from .current_neighborhood_conflict_avg_by_country_resolver import *
-from .current_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country_resolver import *
-from .current_neighborhood_conflict_avg_times_previous_year_was_major_by_country_resolver import *
-from .current_neighborhood_conflict_avg_times_previous_year_was_minor_by_country_resolver import *
 from .current_neighborhood_education_avg_by_country_resolver import *
 from .current_neighborhood_imr_avg_by_country_resolver import *
 from .current_neighborhood_youth_avg_by_country_resolver import *
@@ -49,10 +45,16 @@ from .next_base_values_resolver import *
 from .previous_logs_minor_conflict_by_country_resolver import *
 from .previous_logs_major_conflict_by_country_resolver import *
 from .previous_logs_no_conflict_by_country_resolver import *
-from .previous_neighborhood_conflict_avg_by_country_resolver import *
-from .previous_neighborhood_conflict_avg_times_previous_logs_no_conflict_by_country_resolver import *
-from .previous_neighborhood_conflict_avg_times_previous_year_was_major_by_country_resolver import *
-from .previous_neighborhood_conflict_avg_times_previous_year_was_minor_by_country_resolver import *
+from .previous_neighborhood_has_minor_conflict_resolver import *
+from .previous_neighborhood_has_minor_conflict_times_previous_year_was_minor_by_country_resolver import *
+from .previous_neighborhood_has_minor_conflict_times_previous_year_was_major_by_country_resolver import *
+from .previous_neighborhood_has_minor_conflict_times_previous_logs_no_conflict_by_country_resolver import *
+from .previous_neighborhood_has_major_conflict_resolver import *
+from .previous_neighborhood_has_major_conflict_times_previous_year_was_minor_by_country_resolver import *
+from .previous_neighborhood_has_major_conflict_times_previous_year_was_major_by_country_resolver import *
+from .previous_neighborhood_has_major_conflict_times_previous_logs_no_conflict_by_country_resolver import *
+from .conflict_exponent_minor_by_country_resolver import *
+from .conflict_exponent_major_by_country_resolver import *
 from .previous_year_conflict_level_by_country_resolver import *
 from .previous_year_was_major_by_country_resolver import *
 from .previous_year_was_minor_by_country_resolver import *
@@ -63,4 +65,3 @@ from .projections_oil_level_by_country_resolver import *
 from .projections_population_level_by_country_resolver import *
 from .projections_youth_level_by_country_resolver import *
 from .should_stop_simulation_resolver import *
-from .tentative_conflict_value_by_country_resolver import *

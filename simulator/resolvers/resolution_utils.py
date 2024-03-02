@@ -18,10 +18,8 @@ def draw_result_from_probability_matrix(
     rand_val = random.random()
     sampled_outcome = None
     previous = 0.0
-    # we draw them randomly
-    order = [0,1,2]
-    random.shuffle(order)
-    for outcome in order:
+
+    for outcome in range(3):
         transition_prob = transition_probabilities_by_outcome[outcome]
         current_prob = previous + transition_prob
         if rand_val < current_prob:
