@@ -27,7 +27,7 @@ class Simulator:
         current_base_values = self._initial_base_variables
         base_variables = utils.compute_base_variables(defs.ResolverBase._dependency_registry)
         while not current_base_values.get(defs.VariableEnum.should_stop_simulation):
-            assert base_variables.issubset(current_base_values), f"not all base variables accounted for"
+            assert base_variables.issubset(current_base_values), f"not all base variables accounted for: {base_variables.difference(current_base_values)}"
             updated_values = utils.resolve(
                 defs.ResolverBase._resolver_registry,
                 defs.ResolverBase._dependency_registry,

@@ -11,6 +11,8 @@ T = TypeVar('T')
 class VariableEnum(Enum):
 
     # BASE, done
+    conflict_level_history_by_country__earlier_to_later = 'conflict_level_history_by_country__earlier_to_later'
+
     previous_year_conflict_level_by_country = 'previous_year_conflict_level_by_country'
     # C1_{t-1} DERIVED done
     previous_year_was_minor_by_country = 'previous_year_was_minor_by_country'
@@ -227,23 +229,10 @@ MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS = {
 }
 EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES = set(MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS.values())
 
-def _safe_log(lvl_check: int, history: list[int]) -> float:
-    try:
-        return math.log(sum((1 if lvl == lvl_check else 0 for lvl in history)))
-    except Exception:
-        return 0
 
-NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS = {
-    VariableEnum.previous_year_conflict_level_by_country: lambda history: history[-1],
-    VariableEnum.previous_year_was_minor_by_country: lambda history: 1 if history[-1] == 1 else 0,
-    VariableEnum.previous_year_was_major_by_country: lambda history: 1 if history[-1] == 2 else 0,
-    VariableEnum.previous_logs_no_conflict_by_country: lambda history:  _safe_log(0, history),
-    VariableEnum.previous_logs_minor_conflict_by_country: lambda history: _safe_log(1, history),
-    VariableEnum.previous_logs_major_conflict_by_country: lambda history: _safe_log(2, history),
+NON_PROJECTED_NECESSARY_VARIABLES = {
+    VariableEnum.conflict_level_history_by_country__earlier_to_later
 }
-
-
-NON_PROJECTED_NECESSARY_VARIABLES = set(NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS)
 
 NEIGHBOR_NECESSARY_BASE_VARIABLES = {
     VariableEnum.country_to_neighbors,
@@ -264,10 +253,7 @@ CONSTANTS_NECESSARY_VARIABLES = {
 
 # probably should not be computed like this but rather from the utils func
 BASE_VARIABLES = {
-    VariableEnum.previous_year_conflict_level_by_country,
-    VariableEnum.previous_logs_no_conflict_by_country,
-    VariableEnum.previous_logs_minor_conflict_by_country,
-    VariableEnum.previous_logs_major_conflict_by_country,
+    VariableEnum.conflict_level_history_by_country__earlier_to_later,
 
     VariableEnum.projections_oil_level_by_country,
     VariableEnum.projections_ethnic_dominance_all_years_by_country,

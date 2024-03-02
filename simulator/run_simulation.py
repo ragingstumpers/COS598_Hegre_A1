@@ -5,7 +5,7 @@ from utils import average_models, create_initial_base_variables, majority_result
 from multiprocessing import Pool
 from simulator import Simulator
 
-_Args = namedtuple("_Args", "cov coeff exo hist start end conc")
+_Args = namedtuple("_Args", "cov coeff exo hist start end lvl_name conc")
 
 def _run_for_model(args: _Args) -> dict[str, dict[int, int]]:
     # lots of shit being done repeatedly, but thats fine for now
@@ -16,7 +16,8 @@ def _run_for_model(args: _Args) -> dict[str, dict[int, int]]:
         args.exo,
         args.hist,
         args.start,
-        args.end
+        args.end,
+        args.lvl_name
     )
     sim = Simulator(initial_base_variables, args.conc)
     return sim.run()
@@ -55,6 +56,10 @@ def _main():
         "-out", "--output_destination",
         type=str, help="filepath to write the results to in CSV format", required=True,
     )
+    sim_cli.add_argument(
+        "-lvl_name", "--conflict_level_name",
+        type=str, help="name for the column that should be used as the conflict level (allows for different definitions to be processed)", required=True,
+    )
 
     args = sim_cli.parse_args()
     assert(len(args.covariance_matrix) == len(args.coefficients)), "number of coeff files doesn't match covariance files"
@@ -67,6 +72,7 @@ def _main():
             args.history,
             args.start_year,
             args.end_year,
+            args.conflict_level_name,
             args.concurrent_simulations
         )
         for cov, coeff in zip(args.covariance_matrix, args.coefficients)
@@ -85,4 +91,4 @@ def _main():
 if __name__ == '__main__':
    _main()
 
-# python run_simulation.py -cov ~/Desktop/m23_cov.csv ~/Desktop/m43_cov.csv ~/Desktop/m45_cov.csv ~/Desktop/m48_cov.csv ~/Desktop/m66_cov.csv ~/Desktop/m67_cov.csv ~/Desktop/m96_cov.csv ~/Desktop/m97_cov.csv ~/Desktop/m98_cov.csv -coeff ~/Desktop/m23_coeff.csv ~/Desktop/m43_coeff.csv ~/Desktop/m45_coeff.csv ~/Desktop/m48_coeff.csv ~/Desktop/m66_coeff.csv ~/Desktop/m67_coeff.csv ~/Desktop/m96_coeff.csv ~/Desktop/m97_coeff.csv ~/Desktop/m98_coeff.csv -exo ~/Desktop/data.csv -hist ~/Desktop/data.csv -start 2000 -end 2008 -conc 100 -out ~/Desktop/results.csv
+# python run_simulation.py -cov ~/Desktop/m23_cov.csv ~/Desktop/m43_cov.csv ~/Desktop/m45_cov.csv ~/Desktop/m48_cov.csv ~/Desktop/m66_cov.csv ~/Desktop/m67_cov.csv ~/Desktop/m96_cov.csv ~/Desktop/m97_cov.csv ~/Desktop/m98_cov.csv -coeff ~/Desktop/m23_coeff.csv ~/Desktop/m43_coeff.csv ~/Desktop/m45_coeff.csv ~/Desktop/m48_coeff.csv ~/Desktop/m66_coeff.csv ~/Desktop/m67_coeff.csv ~/Desktop/m96_coeff.csv ~/Desktop/m97_coeff.csv ~/Desktop/m98_coeff.csv -exo ~/Desktop/projection.csv -hist ~/Desktop/merged_v2.csv -start 2009 -end 2020 -conc 100 -out ~/Desktop/results.csv -lvl_name intensity

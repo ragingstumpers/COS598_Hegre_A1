@@ -1,5 +1,6 @@
 from .average_coefficients_major_by_variable_resolver import *
 from .average_coefficients_minor_by_variable_resolver import *
+from .conflict_level_history_by_country__earlier_to_later_resolver import *
 from .country_in_south_africa_region_by_country_resolver import *
 from .country_in_west_africa_region_by_country_resolver import *
 from .country_in_west_asia_north_africa_by_country_resolver import *

@@ -1,22 +1,5 @@
 from defs import ResolverBase, VariableEnum
-import math
 from typing import Any
-
-def _safe_log(val: float) -> float:
-    try:
-        return math.log(val)
-    except Exception:
-        return 0
-
-def _update_logs_conflict_history_by_country(
-        logs_conflict_history_by_country: float,
-        conflict_level: int,
-        conflict_level_by_country: dict[str, int]
-    ) -> dict[str, float]:
-    return {
-        country: _safe_log((math.e**logs_conflict_history_by_country[country])+(1 if current_level == conflict_level else 0))
-        for country, current_level in conflict_level_by_country.items()
-    }
 
 
 class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
@@ -26,9 +9,7 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
         VariableEnum.current_conflict_level_by_country,
         # ADD MORE, MOST OF THEM WILL MAP TO THEMSELVES, SOME OTHERS WONT
 
-        VariableEnum.previous_logs_no_conflict_by_country,
-        VariableEnum.previous_logs_minor_conflict_by_country,
-        VariableEnum.previous_logs_major_conflict_by_country,
+        VariableEnum.conflict_level_history_by_country__earlier_to_later,
 
         VariableEnum.projections_oil_level_by_country,
         VariableEnum.projections_ethnic_dominance_all_years_by_country,
@@ -60,23 +41,12 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
 
 
         return {
-            VariableEnum.previous_year_conflict_level_by_country: current_values[VariableEnum.current_conflict_level_by_country],
+            # update this
+            VariableEnum.conflict_level_history_by_country__earlier_to_later: {
+                country: history + [current_values[VariableEnum.current_conflict_level_by_country][country]]
+                for country, history in current_values[VariableEnum.conflict_level_history_by_country__earlier_to_later].items()
+            },
 
-            VariableEnum.previous_logs_no_conflict_by_country: _update_logs_conflict_history_by_country(
-                current_values[VariableEnum.previous_logs_no_conflict_by_country],
-                0,
-                current_values[VariableEnum.current_conflict_level_by_country],
-            ),
-            VariableEnum.previous_logs_minor_conflict_by_country: _update_logs_conflict_history_by_country(
-                current_values[VariableEnum.previous_logs_minor_conflict_by_country],
-                1,
-                current_values[VariableEnum.current_conflict_level_by_country],
-            ),
-            VariableEnum.previous_logs_major_conflict_by_country: _update_logs_conflict_history_by_country(
-                current_values[VariableEnum.previous_logs_major_conflict_by_country],
-                2,
-                current_values[VariableEnum.current_conflict_level_by_country],
-            ),
             VariableEnum.projections_oil_level_by_country: current_values[VariableEnum.projections_oil_level_by_country],
             VariableEnum.projections_ethnic_dominance_all_years_by_country: current_values[VariableEnum.projections_ethnic_dominance_all_years_by_country],
             VariableEnum.projections_imr_level_by_country: current_values[VariableEnum.projections_imr_level_by_country],

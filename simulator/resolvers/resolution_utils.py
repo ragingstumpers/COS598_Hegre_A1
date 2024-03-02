@@ -18,7 +18,11 @@ def draw_result_from_probability_matrix(
     rand_val = random.random()
     sampled_outcome = None
     previous = 0.0
-    for outcome, transition_prob in transition_probabilities_by_outcome.items():
+    # we draw them randomly
+    order = [0,1,2]
+    random.shuffle(order)
+    for outcome in order:
+        transition_prob = transition_probabilities_by_outcome[outcome]
         current_prob = previous + transition_prob
         if rand_val < current_prob:
             sampled_outcome = outcome
@@ -61,3 +65,15 @@ def compute_logistic_probability(outcome_to_exponent: dict[S, list[float]]) -> d
         outcome: exponentiated / denominator
         for outcome, exponentiated in individual_exponentiated.items()
     }
+
+
+def safe_log_previous_consecutive(lvl_check: int, history: list[int]) -> float:
+    consecutive = 0
+    for lvl in history[:-1][::-1]:
+        if lvl != lvl_check:
+            break
+        consecutive += 1
+    try:
+        return math.log(consecutive)
+    except Exception:
+        return 0

@@ -1,6 +1,7 @@
 from collections import defaultdict
 import csv
 import defs
+from functools import reduce
 import numpy
 import random
 from typing import Any, Type, TypeVar
@@ -254,7 +255,7 @@ def _process_coeffs_matrix_csv(filepath: str, prefix: str, name_map: dict[str, d
             possible_varname = _prefix_split_col(prefix, raw_possible_varname)
             if possible_varname in name_map:
                 coeffs[name_map[possible_varname]] = float(val)
-        assert(set(coeffs) == set(name_map.values()))
+        assert(set(coeffs) == set(name_map.values())),  f"the two sets differ:    {set(coeffs).difference(set(name_map.values()))}\n {set(name_map.values()).difference(set(coeffs))}\n"
         return coeffs
 
 
@@ -275,13 +276,13 @@ _SAMPLE_COUNTRIES = {
 }
 
 
-def _sample_neighbors() -> dict[str, list[str]]:
+def _sample_neighbors() -> tuple[dict[str, list[str]], set[str]]:
     return {
         country: []
         for country in _SAMPLE_COUNTRIES
-    }
+    }, _SAMPLE_COUNTRIES
 
-def _process_neighbor_countries_csv(filepath: str) -> dict[str, list[str]]:
+def _process_neighbor_countries_csv(filepath: str) -> tuple[dict[str, list[str]], set[str]]:
     country_to_region = _process_region_by_country(filepath)
     region_to_countries_set = defaultdict(set)
     for country, region in country_to_region.items():
@@ -290,24 +291,25 @@ def _process_neighbor_countries_csv(filepath: str) -> dict[str, list[str]]:
         country: list(countries - {country})
         for countries in region_to_countries_set.values()
         for country in countries
-    }
+    }, set(country_to_region)
 
 
-def process_neighbor_countries_csv(filepath: str) -> dict[str, list[str]]:
+def process_neighbor_countries_csv(filepath: str) -> tuple[dict[defs.VariableEnum, dict[str, list[str]]], set[str]]:
     # return _sample_neighbors()
-    return _process_neighbor_countries_csv(filepath)
+    country_to_neighbors, countries = _process_neighbor_countries_csv(filepath)
+    return {defs.VariableEnum.country_to_neighbors: country_to_neighbors}, countries
 
 
 
 
-def _sample_regions() -> dict[defs.VariableEnum, dict[str, int]]:
+def _sample_regions() -> tuple[dict[defs.VariableEnum, dict[str, float]], set[str]]:
     return {
         var: {
             country: 0
             for country in _SAMPLE_COUNTRIES
         }
         for var in defs.REGION_NECESSARY_VARIABLES
-    }
+    }, set(_SAMPLE_COUNTRIES)
 
 def _process_region_by_country(filepath: str) -> dict[str, int]:
     with open(filepath, mode="r", newline='') as csv_file:
@@ -322,7 +324,7 @@ def _process_region_by_country(filepath: str) -> dict[str, int]:
 
         return region_by_country
 
-def _process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, dict[str, float]]:
+def _process_regional_information_csv(filepath: str) -> tuple[dict[defs.VariableEnum, dict[str, float]], set[str]]:
     country_to_region = _process_region_by_country(filepath)
     return {
         var: {
@@ -330,10 +332,10 @@ def _process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, 
             for country, region in country_to_region.items()
         }
        for var, processor in defs.REGION_NECESSARY_VARIABLES_PROCESSORS.items()
-    }
+    }, set(country_to_region)
 
 
-def process_regional_information_csv(filepath: str) -> dict[defs.VariableEnum, dict[str, int]]:
+def process_regional_information_csv(filepath: str) -> tuple[dict[defs.VariableEnum, dict[str, float]], set[str]]:
     # return _sample_regions()
     return _process_regional_information_csv(filepath)
 
@@ -348,8 +350,9 @@ def _convert_type_with_default(raw: str, convert_to: Type[S], default: S) -> S:
         return default
 
 
-def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str, name_map: dict[str, defs.VariableEnum]) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
-    with open(filepath, mode="r", newline='') as csv_file:
+def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str, name_map: dict[str, defs.VariableEnum]) -> tuple[dict[defs.VariableEnum, dict[int, dict[str, Any]]], set[str]]:
+    # had to change encoding for some reason
+    with open(filepath, mode="r", newline='', encoding='mac_roman') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
         all_countries = set()
@@ -362,6 +365,7 @@ def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath:
             year = int(row['year'])
             if year < start_year or year > end_year:
                 continue
+
             for possible_varname, val in row.items():
                 if possible_varname in name_map:
                     variable = name_map[possible_varname]
@@ -369,15 +373,18 @@ def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath:
                     proj_by_var_by_year_by_country[variable][year][country] = value
 
         # ensure that all countries have something for the exo variables, defaulting to 0
-        for proj_by_year_by_country in proj_by_var_by_year_by_country.values():
-            for proj_by_country in proj_by_year_by_country.values():
+        # actually, we should probably raise an error if there is no data for one of the countries...
+        for var, proj_by_year_by_country in proj_by_var_by_year_by_country.items():
+            for yaer, proj_by_country in proj_by_year_by_country.items():
                 for country in all_countries:
                     if country not in proj_by_country:
-                        proj_by_country[country] = 0
-        assert(set(proj_by_var_by_year_by_country) == set(name_map.values()))
-        return proj_by_var_by_year_by_country
+                        raise AssertionError(f"Country: {country} does not have projections for variable: {var.value} for year: {year}")
+                        # proj_by_country[country] = 0
 
-def _sample_exo(start_year: int, end_year: int) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+        assert(set(proj_by_var_by_year_by_country) == set(name_map.values())), f"the two sets differ:    {set(proj_by_var_by_year_by_country).difference(set(name_map.values()))}\n {set(name_map.values()).difference(set(proj_by_var_by_year_by_country))}\n"
+        return proj_by_var_by_year_by_country, all_countries
+
+def _sample_exo(start_year: int, end_year: int) -> tuple[dict[defs.VariableEnum, dict[int, dict[str, Any]]], set[str]]:
     # should pass in start and end and validate that there is an entry for each in the projections
     return {
         var: {
@@ -388,29 +395,28 @@ def _sample_exo(start_year: int, end_year: int) -> dict[defs.VariableEnum, dict[
             for year in range(start_year, end_year+1)
         }
         for var in defs.EXOGENOUS_PROJECTIONS_NECESSARY_VARIABLES
-    }
+    }, set(_SAMPLE_COUNTRIES)
 
-def process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+def process_exogenous_projections_csv(start_year: int, end_year: int, filepath: str) -> tuple[dict[defs.VariableEnum, dict[int, dict[str, Any]]], set[str]]:
     # values_by_variable_by_year_by_country = _sample_exo(start_year, end_year)
-    values_by_variable_by_year_by_country = _process_exogenous_projections_csv(start_year, end_year, filepath, defs.MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS)
+    values_by_variable_by_year_by_country, all_countries = _process_exogenous_projections_csv(start_year, end_year, filepath, defs.MAP_EXOGENOUS_PROJECTIONS_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS)
     for years_to_values_by_country in values_by_variable_by_year_by_country.values():
         assert start_year == min(years_to_values_by_country)
         assert end_year == max(years_to_values_by_country)
-    return values_by_variable_by_year_by_country
+    return values_by_variable_by_year_by_country, all_countries
 
 
 
 
-def _sample_non_projected() -> dict[defs.VariableEnum, dict[str, float]]:
+def _sample_non_projected() -> tuple[dict[defs.VariableEnum, dict[str, float]], set[str]]:
     return {
-        var: {
-            country: random.choice([0,0,0,0,0,1,1,2])
+        defs.VariableEnum.conflict_level_history_by_country__earlier_to_later: {
+            country: [0]
             for country in _SAMPLE_COUNTRIES
         }
-        for var in defs.NON_PROJECTED_NECESSARY_VARIABLES
-    }
+    }, set(_SAMPLE_COUNTRIES)
 
-def _process_conflict_history_by_country_csv(start_year: int, filepath: str) -> dict[str, list[int]]:
+def _process_conflict_history_by_country_csv(start_year: int, filepath: str, conflict_level_name: str) -> dict[str, list[int]]:
     with open(filepath, mode="r", newline='') as csv_file:
         # first row is interpreted as keys
         reader = csv.DictReader(csv_file)
@@ -425,24 +431,18 @@ def _process_conflict_history_by_country_csv(start_year: int, filepath: str) -> 
                 continue
 
             # CHECK WITH FUMIYA WHAT THE KEY SHOULD BE
-            conflict_level = _convert_type_with_default(row['conflict'], int, 0)
+            conflict_level = _convert_type_with_default(row[conflict_level_name], int, 0)
             conflict_level_history_by_country[country].append(conflict_level)
 
         return conflict_level_history_by_country
 
-def _process_non_projected_base_variables_csv(start_year: int, filepath: str) -> dict[defs.VariableEnum, dict[str, float]]:
-    conflict_history_by_country = _process_conflict_history_by_country_csv(start_year, filepath)
-    return {
-        var: {
-            country: processor(history)
-            for country, history in conflict_history_by_country.items()
-        }
-        for var, processor in defs.NON_PROJECTED_NECESSARY_VARIABLES_HISTORY_PROCESSORS.items()
-    }
+def _process_non_projected_base_variables_csv(start_year: int, filepath: str, conflict_level_name: str) -> tuple[dict[defs.VariableEnum, dict[str, int]], set[str]]:
+    conflict_history_by_country = _process_conflict_history_by_country_csv(start_year, filepath, conflict_level_name)
+    return {defs.VariableEnum.conflict_level_history_by_country__earlier_to_later: conflict_history_by_country}, set(conflict_history_by_country)
 
-def process_non_projected_base_variables_csv(start_year: int, filepath: str) -> dict[defs.VariableEnum, dict[str, dict[int, Any]]]:
+def process_non_projected_base_variables_csv(start_year: int, filepath: str, conflict_level_name: str) -> tuple[dict[defs.VariableEnum, dict[str, int]], set[str]]:
     # return _sample_non_projected()
-    return _process_non_projected_base_variables_csv(start_year, filepath)
+    return _process_non_projected_base_variables_csv(start_year, filepath, conflict_level_name)
 
 
 
@@ -482,12 +482,12 @@ def average_models(mult_sim_results: list[dict[str, dict[int, int]]]) -> dict[st
 def write_ratio_results(write_file: str, avg_results: dict[str, dict[int, dict[int, float]]]) -> None:
     with open(write_file, "w+") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["COUNTRY", "YEAR", "PERCENTAGE NONE", "PERCENTAGE MINOR", "PERCENTAGE MAJOR"])
+        writer.writerow(["COUNTRY", "YEAR", "PERCENTAGE NONE", "PERCENTAGE MINOR", "PERCENTAGE MAJOR", "PERCENTAGE_EITHER"])
         for country in sorted(avg_results):
             country_results_by_year = avg_results[country]
             for year in sorted(country_results_by_year, key=lambda year_string: int(year_string)):
                 percentages_by_lvl = country_results_by_year[year]
-                writer.writerow([country, year, percentages_by_lvl[0], percentages_by_lvl[1], percentages_by_lvl[2]])
+                writer.writerow([country, year, percentages_by_lvl[0], percentages_by_lvl[1], percentages_by_lvl[2], percentages_by_lvl[1] + percentages_by_lvl[2]])
 
 
 def write_results(write_file: str, maj_results: dict[str, dict[int, int]]) -> None:
@@ -507,18 +507,55 @@ def create_initial_base_variables(
         history_filpath: str,
         start_year: int,
         end_year: int,
+        conflict_level_name: str,
     ) -> dict[defs.VariableEnum, Any]:
 
     assert start_year <= end_year
+
+    def _intersection_sets(*sets: list[set[S]]) -> set[S]:
+        return reduce(lambda a, b: a.intersection(b), sets)
+
+    exo, exo_countries = process_exogenous_projections_csv(start_year, end_year, exogenous_projections_filepath)
+    non_proj, np_countries = process_non_projected_base_variables_csv(start_year, history_filpath, conflict_level_name)
+    reg, reg_countries = process_regional_information_csv(history_filpath)
+    neighbors, n_countries = process_neighbor_countries_csv(history_filpath)
+
+    countries = _intersection_sets(exo_countries, np_countries, reg_countries, n_countries)
+
+    def _exo_for_present_countries(exo: dict[defs.VariableEnum, dict[int, dict[str, Any]]]) -> dict[defs.VariableEnum, dict[int, dict[str, Any]]]:
+        return {
+            var: {
+                year: {
+                    country: val
+                    for country, val in proj_by_country.items()
+                    if country in countries
+                }
+                for year, proj_by_country in proj_by_year.items()
+            }
+            for var, proj_by_year in exo.items()
+    }
+
+    def _not_exo_for_present_countries(not_exo: dict[defs.VariableEnum, dict[str, Any]], val_is_countries_list: bool=False) -> dict[defs.VariableEnum, dict[str, Any]]:
+        return {
+            var: {
+                country: val if not val_is_countries_list else [c for c in val if c in countries]
+                for country, val in val_by_country.items()
+                if country in countries
+            }
+            for var, val_by_country in not_exo.items()
+        }
+
+
+
     return {
         defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(covariance_matrix_filepath),
         defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(coefficients_filepath),
         defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(covariance_matrix_filepath),
         defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(coefficients_filepath),
-        **process_exogenous_projections_csv(start_year, end_year, exogenous_projections_filepath),
-        **process_non_projected_base_variables_csv(start_year, history_filpath),
-        **process_regional_information_csv(history_filpath),
-        defs.VariableEnum.country_to_neighbors: process_neighbor_countries_csv(history_filpath),
+        **_exo_for_present_countries(exo),
+        **_not_exo_for_present_countries(non_proj),
+        **_not_exo_for_present_countries(reg),
+        **_not_exo_for_present_countries(neighbors, val_is_countries_list=True),
         defs.VariableEnum.current_year: start_year,
         defs.VariableEnum.end_year: end_year,
         defs.VariableEnum.should_stop_simulation: end_year < start_year,
