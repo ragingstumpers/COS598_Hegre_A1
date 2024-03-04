@@ -222,11 +222,11 @@ def _process_covariance_matrix_csv_two(filepath: str, prefix: str, begin_after: 
 
 def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values()))
-    return _process_covariance_matrix_csv_two(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    return _process_covariance_matrix_csv(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
 
 def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_covariance_matrix_csv_two(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    return _process_covariance_matrix_csv(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
 
 
 
@@ -375,7 +375,7 @@ def _process_exogenous_projections_csv(start_year: int, end_year: int, filepath:
         # ensure that all countries have something for the exo variables, defaulting to 0
         # actually, we should probably raise an error if there is no data for one of the countries...
         for var, proj_by_year_by_country in proj_by_var_by_year_by_country.items():
-            for yaer, proj_by_country in proj_by_year_by_country.items():
+            for year, proj_by_country in proj_by_year_by_country.items():
                 for country in all_countries:
                     if country not in proj_by_country:
                         raise AssertionError(f"Country: {country} does not have projections for variable: {var.value} for year: {year}")
