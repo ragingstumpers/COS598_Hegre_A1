@@ -482,7 +482,7 @@ def average_models(mult_sim_results: list[dict[str, dict[int, int]]]) -> dict[st
 def write_ratio_results(write_file: str, avg_results: dict[str, dict[int, dict[int, float]]]) -> None:
     with open(write_file, "w+") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["COUNTRY", "YEAR", "PERCENTAGE NONE", "PERCENTAGE MINOR", "PERCENTAGE MAJOR", "PERCENTAGE_EITHER"])
+        writer.writerow(["COUNTRY", "YEAR", "NONE", "MINOR", "MAJOR", "EITHER"])
         for country in sorted(avg_results):
             country_results_by_year = avg_results[country]
             for year in sorted(country_results_by_year, key=lambda year_string: int(year_string)):
