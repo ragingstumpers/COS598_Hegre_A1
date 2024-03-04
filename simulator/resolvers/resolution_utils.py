@@ -66,8 +66,10 @@ def compute_logistic_probability(outcome_to_exponent: dict[S, list[float]]) -> d
 
 
 def safe_log_previous_consecutive(lvl_check: int, history: list[int]) -> float:
+    if history[-1] != lvl_check or history[-2] != lvl_check:
+        return 0
     consecutive = 0
-    for lvl in history[:-1][::-1]:
+    for lvl in history[:-2][::-1]:
         if lvl != lvl_check:
             break
         consecutive += 1

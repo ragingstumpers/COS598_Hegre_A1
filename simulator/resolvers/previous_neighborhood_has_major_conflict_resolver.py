@@ -14,5 +14,5 @@ class PreviousNeighborhoodHasMajorConflictResolver(ResolverBase[dict[str, float]
         previous_neighborhood_has_major_conflict = {}
         for country in previous_conflict_by_country.keys():
             neighbors = country_to_neighbors[country]
-            previous_neighborhood_has_major_conflict[country] = 1 if any((previous_conflict_by_country[neighbor] == 2 for neighbor in neighbors if neighbor != country)) else 0
+            previous_neighborhood_has_major_conflict[country] = sum((1 if previous_conflict_by_country[neighbor] == 2 else 0 for neighbor in neighbors if neighbor != country))
         return previous_neighborhood_has_major_conflict
