@@ -9,6 +9,6 @@ class PreviousYearConflictLevelByCountryResolver(ResolverBase[dict[str, int]]):
     @classmethod
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> dict[str, int]:
         return {
-            country: history[-2]
+            country: history[-1]
             for country, history in current_values[VariableEnum.conflict_level_history_by_country__earlier_to_later].items()
         }
