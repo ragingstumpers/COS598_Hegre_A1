@@ -182,6 +182,10 @@ class VariableEnum(Enum):
     # DERIVED BUT BASE done
     should_stop_simulation = 'should_stop_simulation'
 
+    # base done
+    conflict_history_lookback = 'conflict_history_lookback'
+
+
 
     # DERIVED done
     next_base_values = 'next_base_values'
@@ -327,9 +331,7 @@ class ResolverBase(Generic[S], metaclass=AbstractResolverMeta):
     def resolve(cls, current_values: dict[VariableEnum, Any]) -> S:
         raise NotImplementedError
 
-_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
-    'lc1': VariableEnum.previous_year_was_minor_by_country,
-    'lc2': VariableEnum.previous_year_was_major_by_country,
+__MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
     'ltsc0': VariableEnum.previous_logs_no_conflict_by_country,
 
     'loi': VariableEnum.current_oil_level_by_country,
@@ -376,24 +378,46 @@ _MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE = {
 
 }
 
+_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_C1C2_BASE = {
+    **__MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    'c1': VariableEnum.previous_year_was_minor_by_country,
+    'c2': VariableEnum.previous_year_was_major_by_country,
+}
 
-MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR = {
-    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_LC1LC2_BASE = {
+    **__MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+    'lc1': VariableEnum.previous_year_was_minor_by_country,
+    'lc2': VariableEnum.previous_year_was_major_by_country,
+}
+
+
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_C1C2 = {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_C1C2_BASE,
     'ltsc1': VariableEnum.previous_logs_minor_conflict_by_country,
     '_cons': VariableEnum.minor_constant,
 }
 
-MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR = {
-    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_BASE,
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_C1C2= {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_C1C2_BASE,
+    'ltsc2': VariableEnum.previous_logs_major_conflict_by_country,
+    '_cons': VariableEnum.major_constant,
+}
+
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_LC1LC2 = {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_LC1LC2_BASE,
+    'ltsc1': VariableEnum.previous_logs_minor_conflict_by_country,
+    '_cons': VariableEnum.minor_constant,
+}
+
+MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_LC1LC2 = {
+    **_MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_LC1LC2_BASE,
     'ltsc2': VariableEnum.previous_logs_major_conflict_by_country,
     '_cons': VariableEnum.major_constant,
 }
 
 
-MINOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values())
-
-MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values())
-
-
+# even though the dict keys differ between c1/c2 and lc1/lc2, the values are the same
+MINOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_C1C2.values())
+MAJOR_COEFFICIENTS_NECESSARY_VARIABLES = set(MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_C1C2.values())
 MINOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MINOR_COEFFICIENTS_NECESSARY_VARIABLES
 MAJOR_COVARIANCE_MATRIX_NECESSARY_VARIABLES = MAJOR_COEFFICIENTS_NECESSARY_VARIABLES

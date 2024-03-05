@@ -1,11 +1,12 @@
 import argparse
 from collections import namedtuple
 from defs import VariableEnum
-from utils import average_models, create_initial_base_variables, majority_results_outer, write_results, write_ratio_results
+from json import loads
 from multiprocessing import Pool
 from simulator import Simulator
+from utils import average_models, create_initial_base_variables, majority_results_outer, write_results, write_ratio_results
 
-_Args = namedtuple("_Args", "cov coeff exo hist start end lvl_name conc")
+_Args = namedtuple("_Args", "cov coeff exo hist start end lvl_name conc use_c1c2")
 
 def _run_for_model(args: _Args) -> dict[str, dict[int, int]]:
     # lots of shit being done repeatedly, but thats fine for now
@@ -17,7 +18,8 @@ def _run_for_model(args: _Args) -> dict[str, dict[int, int]]:
         args.hist,
         args.start,
         args.end,
-        args.lvl_name
+        args.lvl_name,
+        args.use_c1c2,
     )
     sim = Simulator(initial_base_variables, args.conc)
     return sim.run()
@@ -60,10 +62,19 @@ def _main():
         "-lvl_name", "--conflict_level_name",
         type=str, help="name for the column that should be used as the conflict level (allows for different definitions to be processed)", required=True,
     )
+    sim_cli.add_argument(
+        "-use_c1c2", "--use_c1c2_instead_of_lc1lc2",
+        type=str, help="true if should use c1/c2 in computing histories instead of lc1/lc2 (false)", required=True,
+    )
 
     args = sim_cli.parse_args()
     assert(len(args.covariance_matrix) == len(args.coefficients)), "number of coeff files doesn't match covariance files"
     
+    if args.use_c1c2_instead_of_lc1lc2 not in ('true', 'false', 'True', 'False'):
+        raise Exception(f"value for use_c1c2_instead_of_lc1lc2: {args.use_c1c2_instead_of_lc1lc2}, is not in ('true', 'false', 'True', 'False')")
+
+    use_c1c2_instead_of_lc1lc2 = loads(args.use_c1c2_instead_of_lc1lc2)
+
     args_list = [
         _Args(
             cov,
@@ -73,7 +84,8 @@ def _main():
             args.start_year,
             args.end_year,
             args.conflict_level_name,
-            args.concurrent_simulations
+            args.concurrent_simulations,
+            use_c1c2_instead_of_lc1lc2,
         )
         for cov, coeff in zip(args.covariance_matrix, args.coefficients)
     ]
@@ -85,10 +97,10 @@ def _main():
         results = p.map(_run_for_model, args_list)
     write_results(args.output_destination, majority_results(results))
     #print(len(results))
-    #print(results)
+    #print(results)  
 
 
 if __name__ == '__main__':
    _main()
 
-# python run_simulation.py -cov ~/Desktop/original_models/m23_cov.csv ~/Desktop/original_models/m43_cov.csv ~/Desktop/original_models/m45_cov.csv ~/Desktop/original_models/m48_cov.csv ~/Desktop/original_models/m66_cov.csv ~/Desktop/original_models/m67_cov.csv ~/Desktop/original_models/m96_cov.csv ~/Desktop/original_models/m97_cov.csv ~/Desktop/original_models/m98_cov.csv -coeff ~/Desktop/original_models/m23_coeff.csv ~/Desktop/original_models/m43_coeff.csv ~/Desktop/original_models/m45_coeff.csv ~/Desktop/original_models/m48_coeff.csv ~/Desktop/original_models/m66_coeff.csv ~/Desktop/original_models/m67_coeff.csv ~/Desktop/original_models/m96_coeff.csv ~/Desktop/original_models/m97_coeff.csv ~/Desktop/original_models/m98_coeff.csv -exo ~/Desktop/original_models/projection.csv -hist ~/Desktop/original_models/merged_v2.csv -start 2009 -end 2020 -conc 100 -out ~/Desktop/original_models/results.csv -lvl_name intensity
+# python run_simulation.py -cov ~/Desktop/Results/conf_v4/c/VarCov/m23.csv ~/Desktop/Results/conf_v4/c/VarCov/m43.csv ~/Desktop/Results/conf_v4/c/VarCov/m45.csv ~/Desktop/Results/conf_v4/c/VarCov/m48.csv ~/Desktop/Results/conf_v4/c/VarCov/m66.csv ~/Desktop/Results/conf_v4/c/VarCov/m67.csv ~/Desktop/Results/conf_v4/c/VarCov/m96.csv ~/Desktop/Results/conf_v4/c/VarCov/m97.csv ~/Desktop/Results/conf_v4/c/VarCov/m98.csv -coeff ~/Desktop/Results/conf_v4/c/Coefs/m23.csv ~/Desktop/Results/conf_v4/c/Coefs/m43.csv ~/Desktop/Results/conf_v4/c/Coefs/m45.csv ~/Desktop/Results/conf_v4/c/Coefs/m48.csv ~/Desktop/Results/conf_v4/c/Coefs/m66.csv ~/Desktop/Results/conf_v4/c/Coefs/m67.csv ~/Desktop/Results/conf_v4/c/Coefs/m96.csv ~/Desktop/Results/conf_v4/c/Coefs/m97.csv ~/Desktop/Results/conf_v4/c/Coefs/m98.csv -exo ~/Desktop/Results/conf_v4/c/projection.csv -hist ~/Desktop/Results/conf_v4/c/merged_conflict_1970_2008.csv -start 2009 -end 2020 -conc 100 -out ~/Desktop/Results/conf_v4/c/results_conflict.csv -lvl_name conflict -use_c1c2 true

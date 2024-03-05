@@ -34,6 +34,8 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
         VariableEnum.covariance_matrix_minor_by_variable,
         VariableEnum.average_coefficients_major_by_variable,
         VariableEnum.covariance_matrix_major_by_variable,
+
+        VariableEnum.conflict_history_lookback,
     ]
 
     @classmethod
@@ -70,4 +72,6 @@ class NextBaseValuesResolver(ResolverBase[dict[str, float]]):
             VariableEnum.covariance_matrix_minor_by_variable: current_values[VariableEnum.covariance_matrix_minor_by_variable],
             VariableEnum.average_coefficients_major_by_variable: current_values[VariableEnum.average_coefficients_major_by_variable],
             VariableEnum.covariance_matrix_major_by_variable: current_values[VariableEnum.covariance_matrix_major_by_variable],
+
+            VariableEnum.conflict_history_lookback: current_values[VariableEnum.conflict_history_lookback],
         }

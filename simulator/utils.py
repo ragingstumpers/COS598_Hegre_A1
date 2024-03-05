@@ -220,13 +220,15 @@ def _process_covariance_matrix_csv_two(filepath: str, prefix: str, begin_after: 
         assert(set(cov) == name_values_set),  f"the two sets differ:    {set(cov).difference(name_values_set)}\n {name_values_set.difference(set(cov))}\n"
         return cov
 
-def process_major_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
+def process_major_covariance_matrix_csv(filepath: str, use_c1c2_instead_of_lc1lc2: bool) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR.values()))
-    return _process_covariance_matrix_csv(filepath, "2:", "2", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    name_map = defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_C1C2 if use_c1c2_instead_of_lc1lc2 else defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_LC1LC2
+    return _process_covariance_matrix_csv(filepath, "2:", "2", "_cons", name_map)
 
-def process_minor_covariance_matrix_csv(filepath: str) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
+def process_minor_covariance_matrix_csv(filepath: str, use_c1c2_instead_of_lc1lc2: bool) -> dict[defs.VariableEnum, dict[defs.VariableEnum, float]]:
     # return _sample_covariance_matrix(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_covariance_matrix_csv(filepath, "1:", "1", "_cons", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    name_map = defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_C1C2 if use_c1c2_instead_of_lc1lc2 else defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_LC1LC2
+    return _process_covariance_matrix_csv(filepath, "1:", "1", "_cons", name_map)
 
 
 
@@ -259,13 +261,15 @@ def _process_coeffs_matrix_csv(filepath: str, prefix: str, name_map: dict[str, d
         return coeffs
 
 
-def process_major_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
+def process_major_coeffs_matrix_csv(filepath: str, use_c1c2_instead_of_lc1lc2: bool) ->  dict[defs.VariableEnum, float]:
     # return _sample_coefficients(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_coeffs_matrix_csv(filepath, "2:", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR)
+    name_map = defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_C1C2 if use_c1c2_instead_of_lc1lc2 else defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MAJOR_LC1LC2
+    return _process_coeffs_matrix_csv(filepath, "2:", name_map)
 
-def process_minor_coeffs_matrix_csv(filepath: str) ->  dict[defs.VariableEnum, float]:
+def process_minor_coeffs_matrix_csv(filepath: str, use_c1c2_instead_of_lc1lc2: bool) ->  dict[defs.VariableEnum, float]:
     # return _sample_coefficients(set(defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR.values()))
-    return _process_coeffs_matrix_csv(filepath, "1:", defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR)
+    name_map = defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_C1C2 if use_c1c2_instead_of_lc1lc2 else defs.MAP_CSV_NAME_TO_VARIABLE_ENUM_FOR_STATS_MINOR_LC1LC2
+    return _process_coeffs_matrix_csv(filepath, "1:", name_map)
 
 
 
@@ -508,6 +512,7 @@ def create_initial_base_variables(
         start_year: int,
         end_year: int,
         conflict_level_name: str,
+        use_c1c2_instead_of_lc1lc2: bool,
     ) -> dict[defs.VariableEnum, Any]:
 
     assert start_year <= end_year
@@ -545,13 +550,11 @@ def create_initial_base_variables(
             for var, val_by_country in not_exo.items()
         }
 
-
-
     return {
-        defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(covariance_matrix_filepath),
-        defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(coefficients_filepath),
-        defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(covariance_matrix_filepath),
-        defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(coefficients_filepath),
+        defs.VariableEnum.covariance_matrix_minor_by_variable: process_minor_covariance_matrix_csv(covariance_matrix_filepath, use_c1c2_instead_of_lc1lc2),
+        defs.VariableEnum.average_coefficients_minor_by_variable: process_minor_coeffs_matrix_csv(coefficients_filepath, use_c1c2_instead_of_lc1lc2),
+        defs.VariableEnum.covariance_matrix_major_by_variable: process_major_covariance_matrix_csv(covariance_matrix_filepath, use_c1c2_instead_of_lc1lc2),
+        defs.VariableEnum.average_coefficients_major_by_variable: process_major_coeffs_matrix_csv(coefficients_filepath, use_c1c2_instead_of_lc1lc2),
         **_exo_for_present_countries(exo),
         **_not_exo_for_present_countries(non_proj),
         **_not_exo_for_present_countries(reg),
@@ -561,4 +564,5 @@ def create_initial_base_variables(
         defs.VariableEnum.should_stop_simulation: end_year < start_year,
         defs.VariableEnum.minor_constant: 1,  # this is one since it will be multiplied by the coefficient drawn
         defs.VariableEnum.major_constant: 1,  # this is one since it will be multiplied by the coefficient drawn
+        defs.VariableEnum.conflict_history_lookback: -1 if use_c1c2_instead_of_lc1lc2 else -2
     }

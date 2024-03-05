@@ -65,3 +65,4 @@ from .projections_oil_level_by_country_resolver import *
 from .projections_population_level_by_country_resolver import *
 from .projections_youth_level_by_country_resolver import *
 from .should_stop_simulation_resolver import *
+from .conflict_history_lookback_resolver import *
