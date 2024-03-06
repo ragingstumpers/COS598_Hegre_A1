@@ -23,4 +23,5 @@ To offer a rough summary of what this does/how it works:
     3) merge all of the concurrent simulation results into one averaging the results from all models, writing it to a CSV
 
     EXAMPLE MINIMAL INVOCATION
+
     python simulator/run_simulation.py -cov ~/Desktop/Results/conf_v4/lc/VarCov/m23.csv [ADD MORE FILES, ENSURING ORDER MATCHES] -coeff ~/Desktop/Results/conf_v4/lc/Coefs/m23.csv [ADD MORE FILES, ENSURING ORDER MATCHES] -exo ~/Desktop/Results/conf_v4/lc/projection.csv -hist ~/Desktop/Results/conf_v4/lc/merged_conflict_1970_2008.csv -start 2009 -end 2020 -conc 100 -out ~/Desktop/Results/conf_v4/lc/results_conflict.csv -lvl_name conflict -use_c1c2 false
